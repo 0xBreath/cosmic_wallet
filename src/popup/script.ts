@@ -1,12 +1,13 @@
-interface Window {
-  cosmic: any;
-}
+// interface Window {
+//   cosmic: any;
+// }
 
 function initExtensionScript() {
-  console.debug('Cosmic Wallet extension: script loaded');
+  console.debug('extension popup script loaded');
 
+  // @ts-ignore
   window.cosmic = {
-    postMessage: (message): void => {
+    postMessage: (message) => {
       const listener = (event) => {
         if (event.detail.id === message.id) {
           window.removeEventListener(

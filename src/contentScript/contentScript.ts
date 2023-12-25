@@ -1,5 +1,5 @@
 function initContentScript() {
-  console.debug('Cosmic Wallet extension: content loaded');
+  console.debug('extension content script loaded');
 
   window.addEventListener(
     "cosmic_wallet_injected_script_message",

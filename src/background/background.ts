@@ -53,7 +53,7 @@ function handleDisconnect(message, sender, sendResponse) {
 }
 
 function initBackground() {
-  console.debug('Cosmic Wallet extension: background script loaded');
+  console.debug('extension background script loaded');
 
   chrome.runtime.onMessage.addListener(
     (message, sender, sendResponse) => {
