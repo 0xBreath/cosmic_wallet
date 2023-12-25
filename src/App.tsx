@@ -13,13 +13,13 @@ import {
   TokenRegistryProvider,
   usePage,
   WalletPage,
-} from "../application";
-import { isExtension, theme } from "../shared";
+} from "./application";
+import { isExtension, theme } from "./shared";
 import {
   ConnectionProvider,
   WalletProvider,
 } from "@solana/wallet-adapter-react";
-import { CosmicWallet } from "../wallet";
+import { CosmicWallet } from "./wallet";
 import { observer } from "mobx-react";
 
 export const App = observer(() => {

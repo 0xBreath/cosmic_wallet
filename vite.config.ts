@@ -28,7 +28,11 @@ export default defineConfig({
       "tiny-secp256k1": "elliptic",
     },
   },
-  plugins: [react(), wasm(), vitePluginRequire(), inject({ Buffer: ["buffer", "Buffer"] })],
+  plugins: [
+    react(),
+    wasm(),
+    // vitePluginRequire(),
+    inject({ Buffer: ["buffer", "Buffer"] })],
   optimizeDeps: {
     esbuildOptions: {
       define: {

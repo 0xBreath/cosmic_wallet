@@ -1,7 +1,7 @@
 export const CosmicWalletIcon = ({ size }: { size: number }) => {
   return (
     <img
-      src={"/public/logo.png"}
+      src={"/logo.png"}
       width={size}
       height={size}
       style={{ borderRadius: "50%" }}
