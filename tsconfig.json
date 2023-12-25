@@ -1,0 +1,35 @@
+{
+  "compileOnSave": false,
+  "compilerOptions": {
+    "allowJs": false,
+    "useDefineForClassFields": true,
+    "esModuleInterop": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "allowSyntheticDefaultImports": true,
+    "jsx": "react-jsx",
+    "moduleResolution": "node",
+    "resolveJsonModule": true,
+    "module": "ESNext",
+    "lib": [
+      "dom",
+      "dom.iterable",
+      "esnext"
+    ],
+    "target": "ESNext",
+    "types": [
+      "vite/client",
+      "node",
+      "chrome"
+    ],
+    "isolatedModules": false,
+    "paths": {
+      "@mui/styled-engine": [
+        "./node_modules/@mui/styled-engine-sc"
+      ]
+    }
+  },
+  "include": [
+    "src", "vite.config.ts", "manifest.json"
+  ]
+}

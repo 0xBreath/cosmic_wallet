@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <link href="/favicon/favicon.ico" rel="icon"/>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    <meta content="#000000" name="theme-color"/>
+    <meta
+            content="Cosmic Wallet - OAuth for Solana"
+            name="description"
+    />
+    <link href="/favicon/logo192.png" rel="apple-touch-icon"/>
+    <!--
+      manifest.json provides metadata used when your web app is installed on a
+      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
+    -->
+    <link href="manifest.json" rel="manifest"/>
+
+    <title>Cosmic Wallet</title>
+</head>
+<body>
+<noscript>You need to enable Javascript to run this application.</noscript>
+    <div id="root"></div>
+    <script src="src/index.tsx" type="module"></script>
+    <script src="src/popup/script.ts" type="module"></script>
+
+
+    <!-- Modifies global `Reflect` object (or defines one in ES5 runtimes). -->
+    <!-- Contains internal polyfills for `Map`, `Set`, and `WeakMap` for older runtimes. -->
+    <script src="node_modules/reflect-metadata/Reflect.js"></script>
+    <!-- Modifies global `Reflect` object (or defines one in ES5 runtimes). -->
+    <!-- Does not include internal polyfills. -->
+    <script src="node_modules/reflect-metadata/ReflectLite.js"></script>
+</body>
+</html>
