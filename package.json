@@ -100,7 +100,7 @@
   },
   "scripts": {
     "start": "PORT=3001 parcel index.html",
-    "build": "yarn && rm -rf dist && tsc && parcel build manifest.json --config @parcel/config-webextension index.html",
+    "build": "yarn && rm -rf dist && parcel build manifest.json --config @parcel/config-webextension index.html",
     "watch": "rm -rf dist && rm -rf .parcel-cache && parcel watch manifest.json --config @parcel/config-webextension index.html"
   },
   "keywords": [],
