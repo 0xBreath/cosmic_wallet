@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8"/>
+    <link href="/favicon/favicon.ico" rel="icon"/>
+    <meta content="width=device-width, initial-scale=1" name="viewport"/>
+    <meta content="#000000" name="theme-color"/>
+    <meta
+            content="Cosmic Wallet - OAuth for Solana"
+            name="description"
+    />
+    <link href="/favicon/logo192.png" rel="apple-touch-icon"/>
+    <!--
+      manifest.json provides metadata used when your web app is installed on a
+      user's mobile device or desktop. See https://developers.google.com/web/fundamentals/web-app-manifest/
+    -->
+    <link href="data:application/json;base64,ewogICJuYW1lIjogIkNvc21pYyBXYWxsZXQiLAogICJkZXNjcmlwdGlvbiI6ICJDb3NtaWMgV2FsbGV0IC0gT2F1dGggZm9yIFNvbGFuYSIsCiAgInZlcnNpb24iOiAiMC4xLjAiLAogICJicm93c2VyX2FjdGlvbiI6IHsKICAgICJkZWZhdWx0X3BvcHVwIjogImluZGV4Lmh0bWwiLAogICAgImRlZmF1bHRfdGl0bGUiOiAiQ29zbWljIFdhbGxldCIKICB9LAogICJtYW5pZmVzdF92ZXJzaW9uIjogMiwKICAiaWNvbnMiOiB7CiAgICAiMTYiOiAiL3B1YmxpYy9mYXZpY29uL2Zhdmljb24uaWNvIiwKICAgICIxOTIiOiAiL3B1YmxpYy9mYXZpY29uL2xvZ28xOTIucG5nIiwKICAgICI1MTIiOiAiL3B1YmxpYy9mYXZpY29uL2xvZ281MTIucG5nIgogIH0sCiAgImJhY2tncm91bmQiOiB7CiAgICAicGVyc2lzdGVudCI6IHRydWUsCiAgICAic2NyaXB0cyI6IFsKICAgICAgInNyYy9iYWNrZ3JvdW5kL2JhY2tncm91bmQudHMiCiAgICBdLAogICAgInR5cGUiOiAibW9kdWxlIgogIH0sCiAgInBlcm1pc3Npb25zIjogWwogICAgInN0b3JhZ2UiCiAgXSwKICAiY29udGVudF9zY3JpcHRzIjogWwogICAgewogICAgICAibWF0Y2hlcyI6IFsKICAgICAgICAiZmlsZTovLyovKiIsCiAgICAgICAgImh0dHA6Ly8qLyoiLAogICAgICAgICJodHRwczovLyovKiIKICAgICAgXSwKICAgICAgImpzIjogWwogICAgICAgICJzcmMvY29udGVudFNjcmlwdC9jb250ZW50U2NyaXB0LnRzIgogICAgICBdLAogICAgICAicnVuX2F0IjogImRvY3VtZW50X3N0YXJ0IiwKICAgICAgImFsbF9mcmFtZXMiOiB0cnVlCiAgICB9CiAgXSwKICAid2ViX2FjY2Vzc2libGVfcmVzb3VyY2VzIjogWwogICAgInNyYy9wb3B1cC9zY3JpcHQudHMiCiAgXSwKICAiY29udGVudF9zZWN1cml0eV9wb2xpY3kiOiAic2NyaXB0LXNyYyAnc2VsZicgJ3NoYTI1Ni1laytqWGtzYlVyMDB4K0VkTExxaXY2OXQ4aEFUaDVyUGpIVnZWVkdBOW1zPSc7IG9iamVjdC1zcmMgJ3NlbGYnIgp9" rel="manifest"/>
+
+    <title>Cosmic Wallet</title>
+
+    <script>
+        window.global = window;
+    </script>
+    
+  <script type="module" crossorigin src="/assets/index-78e2db75.js"></script>
+  <link rel="stylesheet" href="/assets/index-96b95121.css">
+</head>
+<body>
+<noscript>You need to enable Javascript to run this application.</noscript>
+    <div id="root"></div>
+    
+    <script src="src/popup/script.ts"></script>
+    <script src="src/contentScript/contentScript.ts"></script>
+
+
+    <!-- Modifies global `Reflect` object (or defines one in ES5 runtimes). -->
+    <!-- Contains internal polyfills for `Map`, `Set`, and `WeakMap` for older runtimes. -->
+    <script src="node_modules/reflect-metadata/Reflect.js"></script>
+    <!-- Modifies global `Reflect` object (or defines one in ES5 runtimes). -->
+    <!-- Does not include internal polyfills. -->
+    <script src="node_modules/reflect-metadata/ReflectLite.js"></script>
+</body>
+</html>

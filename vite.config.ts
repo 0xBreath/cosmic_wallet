@@ -1,10 +1,11 @@
 import { defineConfig } from "vite";
 import { NodeGlobalsPolyfillPlugin } from "@esbuild-plugins/node-globals-polyfill";
 import rollupNodePolyFill from "rollup-plugin-node-polyfills";
+import { NodeModulesPolyfillPlugin } from '@esbuild-plugins/node-modules-polyfill'
 import inject from "@rollup/plugin-inject";
 import react from "@vitejs/plugin-react";
 import wasm from "vite-plugin-wasm";
-import vitePluginRequire from "vite-plugin-require";
+// import vitePluginRequire from "vite-plugin-require";
 import { resolve } from 'path';
 import "reflect-metadata";
 
@@ -30,9 +31,9 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    wasm(),
-    // vitePluginRequire(),
-    inject({ Buffer: ["buffer", "Buffer"] })],
+    // wasm(),
+    // inject({ Buffer: ["buffer", "Buffer"] })
+  ],
   optimizeDeps: {
     esbuildOptions: {
       define: {
@@ -43,20 +44,21 @@ export default defineConfig({
           process: true,
           buffer: true,
         }),
+        NodeModulesPolyfillPlugin()
       ],
     },
   },
   build: {
     rollupOptions: {
       plugins: [
-        rollupNodePolyFill() as any,
-        inject({ Buffer: ["buffer", "Buffer"] }),
-        wasm(),
+        rollupNodePolyFill(),
+        // inject({ Buffer: ["buffer", "Buffer"] }),
+        // wasm(),
       ],
     },
-    commonjsOptions: {
-      transformMixedEsModules: true,
-    },
+    // commonjsOptions: {
+    //   transformMixedEsModules: true,
+    // },
   },
   // publicDir: "static",
   publicDir

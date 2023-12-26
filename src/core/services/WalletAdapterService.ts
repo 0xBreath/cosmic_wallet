@@ -1,9 +1,9 @@
 import "@abraham/reflection";
 import { Adapter, WalletAdapterNetwork } from "@solana/wallet-adapter-base";
-import {
-  BackpackWalletAdapter,
-  SolflareWalletAdapter,
-} from "@solana/wallet-adapter-wallets";
+// import {
+//   BackpackWalletAdapter,
+//   SolflareWalletAdapter,
+// } from "@solana/wallet-adapter-wallets";
 import { CosmicWalletAdapter } from "../../wallet";
 
 export interface IWalletAdaptorService {
@@ -27,8 +27,8 @@ export class WalletAdapterService implements IWalletAdaptorService {
       // new LedgerWalletAdapter({
       //   derivationPath: getDerivationPath(),
       // }),
-      new SolflareWalletAdapter(),
-      new BackpackWalletAdapter(),
+      // new SolflareWalletAdapter(),
+      // new BackpackWalletAdapter(),
       // todo: CosmicWalletAdapter
       new CosmicWalletAdapter(),
     ];

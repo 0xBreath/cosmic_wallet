@@ -17,6 +17,21 @@
     <link href="manifest.json" rel="manifest"/>
 
     <title>Cosmic Wallet</title>
+
+    <script>
+        window.global = window;
+    </script>
+    <script type="module">
+        import process from "process";
+        import EventEmitter from "events";
+        import {Buffer} from "buffer";
+        import { BinaryLike, pbkdf2 } from "crypto";
+        window.BinaryLike = BinaryLike;
+        window.pbkdf2 = pbkdf2;
+        window.Buffer = Buffer;
+        window.process = process;
+        window.EventEmitter = EventEmitter;
+    </script>
 </head>
 <body>
 <noscript>You need to enable Javascript to run this application.</noscript>
