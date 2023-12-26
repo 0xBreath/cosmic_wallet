@@ -15,7 +15,7 @@
     "target": "ESNext",
     "skipLibCheck": true,
     "noEmit": true,
-    "isolatedModules": false,
+    "isolatedModules": true,
     "lib": [
       "dom",
       "esnext"

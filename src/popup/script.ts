@@ -1,15 +1,8 @@
-
-
-// interface Window {
-//   cosmic: any;
-// }
-
-function initExtensionScript() {
+function initPopupScript() {
   console.debug('extension popup script loaded');
 
-  const cosmicWindow: any = window;
-
-  cosmicWindow.cosmic = {
+  // @ts-ignore
+  window.cosmic = {
     postMessage: (message) => {
       const listener = (event) => {
         if (event.detail.id === message.id) {
@@ -29,5 +22,6 @@ function initExtensionScript() {
       );
     },
   };
-}
-initExtensionScript();
+};
+
+initPopupScript();

@@ -1,3 +1,4 @@
+
 const responseHandlers = new Map();
 let unlockedMnemonic = "";
 

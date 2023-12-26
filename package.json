@@ -35,6 +35,7 @@
     "bs58": "^5.0.0",
     "buffer": "^6.0.3",
     "chance": "1.1.9",
+    "chrome-types": "^0.1.246",
     "crypto": "^1.0.1",
     "crypto-browserify": "^3.12.0",
     "dayjs": "^1.11.10",
@@ -100,8 +101,8 @@
   },
   "scripts": {
     "start": "PORT=3001 parcel index.html",
-    "build": "yarn && rm -rf dist && parcel build manifest.json --config @parcel/config-webextension index.html",
-    "watch": "rm -rf dist && rm -rf .parcel-cache && parcel watch manifest.json --config @parcel/config-webextension index.html"
+    "build": "yarn && rm -rf dist && parcel build manifest.json --public-url './' --config @parcel/config-webextension index.html",
+    "watch": "rm -rf dist && rm -rf .parcel-cache && parcel watch manifest.json --public-url './' --config @parcel/config-webextension index.html"
   },
   "keywords": [],
   "author": "",
