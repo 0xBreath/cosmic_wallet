@@ -1,4 +1,4 @@
-// import React from "react";
+import React from "react";
 import "./shared/styles/globals.css";
 import App from "./App";
 
