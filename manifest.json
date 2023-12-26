@@ -30,8 +30,7 @@
         "https://*/*"
       ],
       "js": [
-        "src/contentScript/contentScript.ts",
-        "src/popup/script.ts"
+        "src/contentScript/contentScript.ts"
       ],
       "run_at": "document_start",
       "all_frames": true

@@ -278,7 +278,8 @@ export class CosmicWallet {
       CosmicWallet.WALLET_COUNT_KEY,
     );
     if (!value) {
-      throw new Error("walletCount should have been initialized as 1");
+      console.warn("Wallet count is not initialized");
+      return 1;
     }
     return JSON.parse(value);
   }

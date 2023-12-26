@@ -27,6 +27,7 @@ export const App = observer(() => {
 
   // Disallow rendering inside an iframe to prevent clickjacking.
   if (window.self !== window.top) {
+    console.debug('exit');
     return null;
   }
 
@@ -39,6 +40,7 @@ export const App = observer(() => {
   );
 
   if (isExtension) {
+    console.debug('isExtension');
     appElement = (
       <ConnectedWalletsProvider>
         <PageProvider>{appElement}</PageProvider>
