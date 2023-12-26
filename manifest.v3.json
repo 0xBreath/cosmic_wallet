@@ -1,9 +1,9 @@
 {
-  "manifest_version": 2,
+  "manifest_version": 3,
   "name": "Cosmic Wallet",
   "description": "Cosmic Wallet - Oauth for Solana",
   "version": "0.1.0",
-  "browser_action": {
+  "action": {
     "default_popup": "index.html",
     "default_title": "Cosmic Wallet"
   },
@@ -13,8 +13,7 @@
     "512": "/public/favicon/logo512.png"
   },
   "background": {
-    "scripts": ["src/background/background.ts"],
-    "persistent": true
+    "service_worker": "src/background/background.ts"
   },
   "permissions": [
     "storage"
@@ -34,8 +33,18 @@
     }
   ],
   "web_accessible_resources": [
-    "src/popup/script.ts"
+    {
+      "resources": [
+        "src/popup/script.ts"
+      ],
+      "matches": [
+        "file://*/*",
+        "http://*/*",
+        "https://*/*"
+      ]
+    }
   ],
-  "content_security_policy": "script-src 'self' 'sha256-ek+jXksbUr00x+EdLLqiv69t8hATh5rPjHVvVVGA9ms='; object-src 'self'"
-
+  "content_security_policy": {
+    "extension_pages": "script-src 'self'; sha256-ek+jXksbUr00x+EdLLqiv69t8hATh5rPjHVvVVGA9ms=; object-src 'self';"
+  }
 }

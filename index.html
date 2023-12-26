@@ -18,24 +18,21 @@
 
     <title>Cosmic Wallet</title>
 
-    <script>
-        window.global = window;
-    </script>
-    <script type="module">
-        import process from "process";
-        window.process = process;
-        import {Buffer} from "buffer";
-        window.Buffer = Buffer;
-        // import { BinaryLike, pbkdf2 } from "crypto";
-        // window.BinaryLike = BinaryLike;
-        // window.pbkdf2 = pbkdf2;
-    </script>
+<!--    <script>-->
+<!--        window.global = window;-->
+<!--    </script>-->
+<!--    <script type="module">-->
+<!--        import process from "process";-->
+<!--        window.process = process;-->
+<!--        import {Buffer} from "buffer";-->
+<!--        window.Buffer = Buffer;-->
+<!--    </script>-->
 </head>
 <body>
 <noscript>You need to enable Javascript to run this application.</noscript>
     <div id="root"></div>
-    <script defer src="src/index.tsx" type="module"></script>
-    <script src="src/popup/script.ts"></script>
-    <script src="src/contentScript/contentScript.ts"></script>
+    <script src="src/index.tsx" type="module"></script>
+<!--    <script src="src/popup/script.ts"></script>-->
+<!--    <script src="src/contentScript/contentScript.ts"></script>-->
 </body>
 </html>
