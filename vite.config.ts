@@ -31,8 +31,8 @@ export default defineConfig({
   },
   plugins: [
     react(),
-    // wasm(),
-    // inject({ Buffer: ["buffer", "Buffer"] })
+    wasm(),
+    inject({ Buffer: ["buffer", "Buffer"] })
   ],
   optimizeDeps: {
     esbuildOptions: {
@@ -47,15 +47,47 @@ export default defineConfig({
         NodeModulesPolyfillPlugin()
       ],
     },
+    include: [
+      '@solana/web3.js',
+      '@solana/web3.js > bn.js',
+      '@solana/web3.js > borsh',
+      '@solana/web3.js > buffer',
+    ]
   },
   build: {
     rollupOptions: {
       plugins: [
         rollupNodePolyFill(),
-        // inject({ Buffer: ["buffer", "Buffer"] }),
-        // wasm(),
+        inject({ Buffer: ["buffer", "Buffer"] }),
+        wasm(),
       ],
     },
+    // transpile: [
+    //   '@blocto/sdk',
+    //   '@project-serum/sol-wallet-adapter',
+    //   '@solana/wallet-adapter-base',
+    //   '@solana/wallet-adapter-bitkeep',
+    //   '@solana/wallet-adapter-bitpie',
+    //   '@solana/wallet-adapter-blocto',
+    //   '@solana/wallet-adapter-clover',
+    //   '@solana/wallet-adapter-coin98',
+    //   '@solana/wallet-adapter-coinhub',
+    //   '@solana/wallet-adapter-ledger',
+    //   '@solana/wallet-adapter-mathwallet',
+    //   '@solana/wallet-adapter-phantom',
+    //   '@solana/wallet-adapter-safepal',
+    //   '@solana/wallet-adapter-slope',
+    //   '@solana/wallet-adapter-solflare',
+    //   '@solana/wallet-adapter-sollet',
+    //   '@solana/wallet-adapter-solong',
+    //   '@solana/wallet-adapter-torus',
+    //   '@solana/wallet-adapter-vue',
+    //   '@solana/wallet-adapter-vue-ui',
+    //   '@solana/wallet-adapter-walletconnect',
+    //   '@solana/wallet-adapter-wallets',
+    //   '@solana/web3.js'
+    // ],
+    ssr: false
     // commonjsOptions: {
     //   transformMixedEsModules: true,
     // },
