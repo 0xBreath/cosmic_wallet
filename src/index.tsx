@@ -7,6 +7,8 @@ if (el === null) throw new Error("Root container missing in index.html");
 
 const root = ReactDOM.createRoot(el);
 
+console.debug('Running index.tsx');
+
 root.render(
   <React.StrictMode>
     <AppRoot />
