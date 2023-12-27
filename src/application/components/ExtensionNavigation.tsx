@@ -46,6 +46,9 @@ export const ExtensionNavigation = () => {
             htmlColor={customTheme.light}
           />
         }
+        onClick={() => {
+          window.open(chrome.extension.getURL("src/index.html"), "_blank");
+        }}
       />
     </BottomNavigation>
   );

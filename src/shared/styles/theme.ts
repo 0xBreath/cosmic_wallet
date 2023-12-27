@@ -16,7 +16,6 @@ export const customTheme = {
   // lunarDark: "#667a83",
   // lunarDark: "#0a0e11",
 
-
   success: "#79B77AFF",
   error: "#d27272",
 
@@ -81,17 +80,16 @@ export const theme: Theme = createTheme({
     },
     h2: {
       fontFamily: customTheme.font.tungsten,
-      fontSize: "40px",
+      fontSize: "30px",
       fontWeight: 500,
       lineHeight: "3rem",
       letterSpacing: "2px",
     },
     h3: {
       fontFamily: customTheme.font.tungsten,
-      fontSize: "28px",
+      fontSize: "22px",
       fontWeight: 500,
-      lineHeight: "2rem",
-      letterSpacing: "0.5px",
+      letterSpacing: "2px",
     },
     body1: {
       fontFamily: customTheme.font.industry,

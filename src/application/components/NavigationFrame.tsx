@@ -107,20 +107,6 @@ function navigationButtons(): React.JSX.Element[] {
   return elements;
 }
 
-function ExpandButton() {
-  const onClick = () => {
-    window.open(chrome.extension.getURL("index.html"), "_blank");
-  };
-
-  return (
-    <Tooltip title="Expand View">
-      <IconButton color="inherit" onClick={onClick}>
-        <OpenInNewOutlined />
-      </IconButton>
-    </Tooltip>
-  );
-}
-
 function WalletButton() {
   const { setPage } = usePage();
   const onClick = () => setPage("wallet");

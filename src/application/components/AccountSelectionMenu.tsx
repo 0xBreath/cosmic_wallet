@@ -66,21 +66,9 @@ export const WebAccountSelectionMenu = observer(
           open={deleteMnemonicOpen}
           onClose={() => setDeleteMnemonicOpen(false)}
         />
-        <Hidden xsDown>
-          <StyledButton onClick={(e: any) => setAnchorEl(e.target)}>
-            <Text>{"Account".toUpperCase()}</Text>
-          </StyledButton>
-        </Hidden>
-        <Hidden smUp>
-          <Tooltip title="Select Account" arrow>
-            <IconButton
-              color="inherit"
-              onClick={(e: any) => setAnchorEl(e.target)}
-            >
-              <AccountCircleOutlined />
-            </IconButton>
-          </Tooltip>
-        </Hidden>
+        <StyledButton onClick={(e: any) => setAnchorEl(e.target)}>
+          <Typography variant="h3">{"Account".toUpperCase()}</Typography>
+        </StyledButton>
         <Menu
           anchorEl={anchorEl}
           open={!!anchorEl}
@@ -242,14 +230,6 @@ export const ExtensionAccountSelectionMenu = observer(
     );
   },
 );
-
-const Text = styled("span")(({ theme }) => ({
-  color: customTheme.dark,
-  fontSize: "22px",
-  fontFamily: customTheme.font.tungsten,
-  fontWeight: 600,
-  letterSpacing: "2px",
-}));
 
 // todo: types
 const AccountListItem = ({

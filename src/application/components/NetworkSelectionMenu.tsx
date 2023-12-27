@@ -35,23 +35,11 @@ export const WebNetworkSelectionMenu = observer(() => {
           setCustomNetworkOpen(false);
         }}
       />
-      <Hidden xsDown>
-        <StyledButton onClick={(e: any) => setAnchorEl(e.target)}>
-          <Typography variant="h3">
-            {cluster?.label.toUpperCase() ?? "Network".toUpperCase()}
-          </Typography>
-        </StyledButton>
-      </Hidden>
-      <Hidden smUp>
-        <Tooltip title="Select Network" arrow>
-          <IconButton
-            color="inherit"
-            onClick={(e: any) => setAnchorEl(e.target)}
-          >
-            <SolanaIcon />
-          </IconButton>
-        </Tooltip>
-      </Hidden>
+      <StyledButton onClick={(e: any) => setAnchorEl(e.target)}>
+        <Typography variant="h3">
+          {cluster?.label.toUpperCase() ?? "Network".toUpperCase()}
+        </Typography>
+      </StyledButton>
       <Menu
         anchorEl={anchorEl}
         open={!!anchorEl}
