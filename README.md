@@ -10,7 +10,6 @@
 
 This functions as a browser extension and a web app.
 
-
 .
 
 .
@@ -19,9 +18,8 @@ This functions as a browser extension and a web app.
 <h3 style="color: #6495ac"> Start Web App </h3>
 
 ```shell
-yarn && yarn start:app
+yarn && yarn start
 ```
-
 
 .
 
@@ -30,20 +28,23 @@ yarn && yarn start:app
 
 <h3 style="color: #6495ac"> Upload Chrome Extension - Development </h3>
 
-1. 
-Run `yarn build:ext`
+1.
+
+Run `yarn build`
 
 The build outputs to `dist` folder, which is the webpacked Javscript.
 
-2. 
+2.
+
 Go to `Manage Extensions` in chrome browser
 
-3. 
+3.
+
 Turn on `Developer Mode`
 
-4. 
-Click `Load unpacked` and upload the `dist` folder
+4.
 
+Click `Load unpacked` and upload the `dist` folder
 
 .
 
@@ -55,7 +56,6 @@ Click `Load unpacked` and upload the `dist` folder
 TODO
 Must be manifest V3
 I think it's a zip of the `dist` that is published to chrome web store
-
 
 .
 

@@ -73,7 +73,7 @@ export function NavigationFrame({ children }: { children: React.ReactNode }) {
             <CosmicWalletIcon size={50} />
           </IconButton>
           <Typography
-            variant={isExtensionWidth ? "h3" : "h2"}
+            variant="h2"
             style={{
               flexGrow: 1,
             }}

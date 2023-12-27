@@ -103,10 +103,9 @@
   },
   "scripts": {
     "refresh": "yarn && rm -rf dist && rm -rf .parcel-cache",
-    "build:app": "yarn refresh && parcel build src/index.html",
-    "build:ext": "yarn refresh && parcel build manifest.json src/index.html",
-    "maybe:needed:build:ext": "yarn refresh && parcel build manifest.json src/content.tsx src/index.html",
-    "start:app": "PORT=3001 parcel src/index.html"
+    "maybe:build": "yarn refresh && parcel build manifest.json src/content.tsx src/index.html",
+    "build": "yarn refresh && parcel build manifest.json src/index.html",
+    "start": "PORT=3001 parcel src/index.html"
   },
   "keywords": [],
   "author": "",

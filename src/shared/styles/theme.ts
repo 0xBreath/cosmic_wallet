@@ -80,8 +80,8 @@ export const theme: Theme = createTheme({
     },
     h2: {
       fontFamily: customTheme.font.tungsten,
-      fontSize: "30px",
-      fontWeight: 500,
+      fontSize: "24px",
+      fontWeight: 600,
       lineHeight: "3rem",
       letterSpacing: "2px",
     },
