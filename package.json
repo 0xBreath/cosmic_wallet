@@ -104,10 +104,8 @@
   "scripts": {
     "refresh": "yarn && rm -rf dist && rm -rf .parcel-cache",
     "build:app": "parcel build src/index.html",
-    "build:ext": " parcel build manifest.json --config @parcel/config-webextension src/index.html",
-    "watch": "yarn refresh && parcel watch manifest.json --config @parcel/config-webextension src/index.html src/content.tsx",
-    "start:app": "PORT=3001 parcel src/index.html",
-    "start:ext": "PORT=3002 parcel src/content.tsx src/index.html"
+    "build:ext": "parcel build src/content.tsx src/index.html",
+    "start:app": "PORT=3001 parcel src/index.html"
   },
   "keywords": [],
   "author": "",
