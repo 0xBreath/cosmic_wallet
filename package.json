@@ -104,7 +104,7 @@
   "scripts": {
     "refresh": "yarn && rm -rf dist && rm -rf .parcel-cache",
     "build:app": "parcel build src/index.html",
-    "build:ext": "parcel build src/content.tsx src/index.html",
+    "build:ext": "parcel build manifest.json src/content.tsx src/index.html",
     "start:app": "PORT=3001 parcel src/index.html"
   },
   "keywords": [],

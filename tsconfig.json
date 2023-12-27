@@ -7,7 +7,7 @@
     "noImplicitAny": false,
     "module": "esnext",
     "moduleResolution": "node",
-    "target": "es5",
+    "target": "esnext",
     "allowJs": true,
     "allowSyntheticDefaultImports": true,
     "jsx": "react",
