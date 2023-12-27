@@ -36,3 +36,16 @@ Click `Load unpacked` and upload the `dist` folder
 TODO
 Must be manifest V3
 I think it's a zip of the `dist` that is published to chrome web store
+
+
+.
+
+.
+
+
+### TODO
+- [ ] Impl SOL transfer logic, UI to setup trx, popup to sign transaction
+- [ ] Impl SPL transfer logic, UI to setup trx, popup to sign transaction
+- [ ] Impl player profile adapter logic to `CosmicWallet`
+- [ ] Impl create profile and keys logic, UI to setup trx, popup to sign transaction
+- [ ] Impl sign trx with profile key, UI to setup, popup to sign transaction
