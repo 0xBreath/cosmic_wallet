@@ -1,39 +1,20 @@
 {
-  "compileOnSave": false,
   "compilerOptions": {
-    "baseUrl": ".",
-    "allowJs": false,
-    "useDefineForClassFields": true,
-    "esModuleInterop": true,
-    "experimentalDecorators": true,
-    "emitDecoratorMetadata": true,
-    "allowSyntheticDefaultImports": true,
-    "jsx": "react-jsx",
+    "outDir": "./dist/",
+    "sourceMap": true,
+    "strict": false,
+    "noImplicitReturns": false,
+    "noImplicitAny": false,
+    "module": "es6",
     "moduleResolution": "node",
-    "resolveJsonModule": true,
-    "module": "ESNext",
-    "target": "ESNext",
-    "skipLibCheck": true,
-    "noEmit": true,
-    "isolatedModules": true,
-    "lib": [
-      "dom",
-      "esnext"
-    ],
-    "types": [
-      "node",
-      "chrome"
-    ],
+    "target": "es5",
+    "allowJs": true,
+    "jsx": "react",
     "paths": {
       "@mui/styled-engine": [
         "./node_modules/@mui/styled-engine-sc"
       ]
     }
   },
-  "exclude": [
-    "node_modules"
-  ],
-  "include": [
-    "src"
-  ]
+  "include": ["./src/**/*"]
 }

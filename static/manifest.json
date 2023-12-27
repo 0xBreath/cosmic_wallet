@@ -8,9 +8,9 @@
     "default_title": "Cosmic Wallet"
   },
   "icons": {
-    "16": "/public/favicon/favicon.ico",
-    "192": "/public/favicon/logo192.png",
-    "512": "/public/favicon/logo512.png"
+    "16": "favicon.ico",
+    "192": "logo192.png",
+    "512": "logo512.png"
   },
   "background": {
     "scripts": ["src/background/background.ts"],

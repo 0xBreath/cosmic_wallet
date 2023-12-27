@@ -3,20 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "description": "",
-  "source": "index.html",
-  "targets": {
-      "browser": {
-        "source": "index.html",
-        "distDir": "dist",
-        "engines": {
-          "browsers": "> 0.5%, last 2 versions, not dead",
-          "node": ">= 16"
-        },
-        "includeNodeModules": true,
-        "isLibrary": false,
-        "outputFormat": "esmodule"
-      }
-  },
+  "type": "module",
+  "browserslist": "> 0.5%, last 2 versions, not dead",
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
@@ -68,6 +56,7 @@
     "mobx-react": "^9.0.1",
     "neverthrow": "^6.0.0",
     "parcel": "^2.10.3",
+    "parcel-plugin-static-files-copy": "^2.6.0",
     "prettier": "^3.1.0",
     "react": "^18.2.0",
     "react-async-hook": "^4.0.0",
@@ -113,9 +102,12 @@
     "typescript": "^4.9.5"
   },
   "scripts": {
-    "start": "PORT=3001 parcel index.html",
-    "build": "yarn && rm -rf dist && parcel build manifest.json --config @parcel/config-webextension index.html",
-    "watch": "rm -rf dist && rm -rf .parcel-cache && parcel watch manifest.json --config @parcel/config-webextension index.html"
+    "refresh": "yarn && rm -rf dist && rm -rf .parcel-cache",
+    "build:app": "parcel build src/index.html",
+    "build:ext": " parcel build manifest.json --config @parcel/config-webextension src/index.html",
+    "watch": "yarn refresh && parcel watch manifest.json --config @parcel/config-webextension index.html",
+    "start:app": "PORT=3001 parcel src/index.html",
+    "start:ext": "PORT=3002 parcel src/content.tsx src/index.html"
   },
   "keywords": [],
   "author": "",
