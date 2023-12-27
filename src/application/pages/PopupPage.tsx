@@ -65,6 +65,8 @@ function getInitialRequests() {
 }
 
 export function PopupPage({ opener }: { opener: any }) {
+  console.debug('PopupPage');
+
   const origin = useMemo(() => {
     let params = new URLSearchParams(window.location.hash.slice(1));
     return params.get("origin");

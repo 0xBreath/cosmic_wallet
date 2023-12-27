@@ -41,7 +41,7 @@ import {
   customTheme,
   isExtension,
   isExtensionPopup,
-  shortenAddress,
+  shortenAddress, theme,
   WalletAccountData,
 } from "../../shared";
 import { useIsExtensionWidth } from "../hooks";
@@ -52,12 +52,16 @@ import { observer } from "mobx-react";
 
 const Content = styled("div")(({ theme }) => ({
   flexGrow: 1,
-  paddingBottom: 3,
-  [theme.breakpoints.up(theme.breakpoints.values.ext)]: {
-    paddingTop: 3,
-    paddingLeft: 1,
-    paddingRight: 1,
+  [theme.breakpoints.down(theme.breakpoints.values.ext)]: {
+    minHeight: '500px',
+    maxWidth: theme.breakpoints.values.ext,
+    minWidth: theme.breakpoints.values.ext
   },
+  // [theme.breakpoints.up(theme.breakpoints.values.ext)]: {
+  //   paddingTop: 3,
+  //   paddingLeft: 1,
+  //   paddingRight: 1,
+  // },
 }));
 
 const Title = styled("span")(({ theme }) => ({
@@ -106,6 +110,7 @@ const StyledFooter = styled("footer")(({ theme }) => ({
 
 export function NavigationFrame({ children }: { children: React.ReactNode }) {
   const isExtensionWidth = useIsExtensionWidth();
+  console.debug('isExtensionWidth?', isExtensionWidth);
   return (
     <>
       <AppBar position="static">
@@ -120,7 +125,7 @@ export function NavigationFrame({ children }: { children: React.ReactNode }) {
             <CosmicWalletIcon size={50} />
           </IconButton>
           <Typography
-            variant="h2"
+            variant={isExtensionWidth ? "h3" : "h2"}
             style={{
               flexGrow: 1,
             }}
@@ -198,7 +203,7 @@ function WalletButton() {
 
 function ConnectionsButton() {
   const { setPage } = usePage();
-  const onClick = () => setPage("connections");
+  const onClick = () => setPage(Page.Connections);
   const connectedWallets = useConnectedWallets();
 
   const connectionAmount = Object.keys(connectedWallets).length;

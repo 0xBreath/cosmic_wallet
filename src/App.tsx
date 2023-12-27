@@ -30,7 +30,7 @@ export const App = observer(() => {
     return null;
   }
 
-  let appElement = (
+  const appElement = (
     <NavigationFrame>
       <Suspense fallback={<LoadingIndicator />}>
         <PageContents />
@@ -38,14 +38,11 @@ export const App = observer(() => {
     </NavigationFrame>
   );
 
-  if (isExtension) {
-    console.debug('isExtension');
-    appElement = (
+  const env = isExtension ? (
       <ConnectedWalletsProvider>
         <PageProvider>{appElement}</PageProvider>
       </ConnectedWalletsProvider>
-    );
-  }
+    ) : appElement;
 
   return (
     <Suspense fallback={<LoadingIndicator />}>
@@ -54,7 +51,7 @@ export const App = observer(() => {
         <ConnectionProvider endpoint={wallet.connection.rpcEndpoint}>
           <TokenRegistryProvider>
             <WalletProvider wallets={wallet.supportedWallets}>
-              {appElement}
+              {env}
             </WalletProvider>
           </TokenRegistryProvider>
         </ConnectionProvider>

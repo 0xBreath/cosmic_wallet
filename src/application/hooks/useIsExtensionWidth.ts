@@ -1,5 +1,7 @@
 import {useMediaQuery} from "@mui/material";
+import { theme } from "../../shared";
 
 export function useIsExtensionWidth() {
-  return useMediaQuery("(max-width:450px)");
+  const extWidth = theme.breakpoints.values.ext;
+  return useMediaQuery(`(max-width:${extWidth}px)`);
 }
