@@ -1,4 +1,6 @@
-import React, { useCallback, useContext, useEffect, useState } from "react";
+import React from "react";
+import { useCallback, useContext, useEffect, useState } from "react";
+
 import EventEmitter from "events";
 import { useListener } from "../hooks";
 import { PublicKey } from "@solana/web3.js";

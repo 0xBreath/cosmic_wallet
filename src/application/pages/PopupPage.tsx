@@ -1,10 +1,11 @@
-import React, {
+import {
   useCallback,
   useEffect,
   useMemo,
   useRef,
   useState,
 } from "react";
+import React from "react";
 import { PublicKey } from "@solana/web3.js";
 import {
   Button,

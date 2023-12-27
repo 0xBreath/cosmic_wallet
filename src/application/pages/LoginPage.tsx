@@ -1,4 +1,6 @@
-import React, { useEffect, useState } from "react";
+import React from "react";
+import { useEffect, useState } from "react";
+
 import { WalletSeedModel } from "../../core";
 import { DialogForm, LoadingIndicator } from "..";
 import { validateMnemonic } from "bip39";

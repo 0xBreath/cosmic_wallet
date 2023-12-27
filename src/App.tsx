@@ -27,7 +27,6 @@ export const App = observer(() => {
 
   // Disallow rendering inside an iframe to prevent clickjacking.
   if (window.self !== window.top) {
-    console.debug('exit');
     return null;
   }
 

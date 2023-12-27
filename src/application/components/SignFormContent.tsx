@@ -1,4 +1,5 @@
-import React, { useEffect } from "react";
+import React  from "react";
+import { useEffect } from 'react';
 import { CardContent, Divider, Tooltip, Typography } from "@mui/material";
 import { WarningOutlined } from "@mui/icons-material";
 import { CosmicWallet } from "../../wallet";

@@ -5,10 +5,11 @@
     "strict": false,
     "noImplicitReturns": false,
     "noImplicitAny": false,
-    "module": "es6",
+    "module": "esnext",
     "moduleResolution": "node",
     "target": "es5",
     "allowJs": true,
+    "allowSyntheticDefaultImports": true,
     "jsx": "react",
     "types": [
       "node",
