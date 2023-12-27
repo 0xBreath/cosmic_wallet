@@ -3,18 +3,19 @@ import { createTheme, Theme } from "@mui/material";
 
 export const customTheme = {
   light: "#e9e9e7",
-  glow: "#FFFFAC",
   cream: "#fcecca",
   grey: "#a79d8a",
   dark: "#121215",
+  dark2: "#19191e",
 
   gold: "#b68f55",
   // gold: "#D1B464",
   orange: "#e77517",
   red: "#924a3b",
   cocoa: "#1f1108",
-  lunarDark: "#667a83",
-  lunarLight: "#438aac",
+  // lunarDark: "#667a83",
+  // lunarDark: "#0a0e11",
+
 
   success: "#79B77AFF",
   error: "#d27272",

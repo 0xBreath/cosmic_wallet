@@ -13,7 +13,7 @@
     "512": "/public/favicon/logo512.png"
   },
   "background": {
-    "scripts": ["src/background/background.ts"],
+    "scripts": ["src/extensionScripts/backgroundScript.ts"],
     "persistent": true
   },
   "permissions": [
@@ -27,14 +27,14 @@
         "https://*/*"
       ],
       "js": [
-        "src/contentScript/contentScript.ts"
+        "src/extensionScripts/contentScript.ts"
       ],
       "run_at": "document_start",
       "all_frames": true
     }
   ],
   "web_accessible_resources": [
-    "src/popup/script.ts"
+    "src/extensionScripts/popupScript.ts"
   ],
   "content_security_policy": "script-src 'self' 'sha256-ek+jXksbUr00x+EdLLqiv69t8hATh5rPjHVvVVGA9ms='; object-src 'self'"
 

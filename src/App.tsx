@@ -3,14 +3,14 @@ import { CssBaseline, ThemeProvider } from "@mui/material";
 
 import {
   ConnectedWalletsProvider,
-  ConnectionsPage,
+  ConnectionsPage, ExtensionNavigation,
   LoadingIndicator,
   LoginPage,
   NavigationFrame,
   Page,
   PageProvider,
   PopupPage,
-  TokenRegistryProvider,
+  TokenRegistryProvider, useIsExtensionWidth,
   usePage,
   WalletPage,
 } from "./application";
@@ -24,6 +24,7 @@ import { observer } from "mobx-react";
 
 export const App = observer(() => {
   const wallet = CosmicWallet.instance;
+  const isExtensionWidth = useIsExtensionWidth();
 
   // Disallow rendering inside an iframe to prevent clickjacking.
   if (window.self !== window.top) {
@@ -34,6 +35,7 @@ export const App = observer(() => {
     <NavigationFrame>
       <Suspense fallback={<LoadingIndicator />}>
         <PageContents />
+        {isExtensionWidth && <ExtensionNavigation />}
       </Suspense>
     </NavigationFrame>
   );

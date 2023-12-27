@@ -24,6 +24,7 @@ import {
   DeleteMnemonicDialog,
   ExportMnemonicDialog,
   SolanaIcon,
+  ExtensionNavigation
 } from ".";
 
 import {
@@ -110,7 +111,6 @@ const StyledFooter = styled("footer")(({ theme }) => ({
 
 export function NavigationFrame({ children }: { children: React.ReactNode }) {
   const isExtensionWidth = useIsExtensionWidth();
-  console.debug('isExtensionWidth?', isExtensionWidth);
   return (
     <>
       <AppBar position="static">
@@ -132,7 +132,7 @@ export function NavigationFrame({ children }: { children: React.ReactNode }) {
           >
             COSMIC WALLET
           </Typography>
-          {navigationButtons().map((button) => button)}
+          {!isExtensionWidth && navigationButtons().map((button) => button)}
         </Toolbar>
       </AppBar>
       <Content>{children}</Content>
