@@ -4,6 +4,19 @@
   "private": true,
   "description": "",
   "source": "index.html",
+  "targets": {
+      "browser": {
+        "source": "index.html",
+        "distDir": "dist",
+        "engines": {
+          "browsers": "> 0.5%, last 2 versions, not dead",
+          "node": ">= 16"
+        },
+        "includeNodeModules": true,
+        "isLibrary": false,
+        "outputFormat": "esmodule"
+      }
+  },
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
@@ -101,22 +114,10 @@
   },
   "scripts": {
     "start": "PORT=3001 parcel index.html",
-    "build": "yarn && rm -rf dist && parcel build manifest.json --public-url './' --config @parcel/config-webextension index.html",
-    "watch": "rm -rf dist && rm -rf .parcel-cache && parcel watch manifest.json --public-url './' --config @parcel/config-webextension index.html"
+    "build": "yarn && rm -rf dist && parcel build manifest.json --config @parcel/config-webextension index.html",
+    "watch": "rm -rf dist && rm -rf .parcel-cache && parcel watch manifest.json --config @parcel/config-webextension index.html"
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
-  "browserslist": {
-    "production": [
-      ">0.2%",
-      "not dead",
-      "not op_mini all"
-    ],
-    "development": [
-      "last 1 chrome version",
-      "last 1 firefox version",
-      "last 1 safari version"
-    ]
-  }
+  "license": "ISC"
 }
