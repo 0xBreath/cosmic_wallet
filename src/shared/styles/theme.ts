@@ -13,7 +13,8 @@ export const customTheme = {
   orange: "#e77517",
   red: "#924a3b",
   cocoa: "#1f1108",
-  lunar: "#667a83",
+  lunarDark: "#667a83",
+  lunarLight: "#438aac",
 
   success: "#79B77AFF",
   error: "#d27272",

@@ -1,8 +1,25 @@
+<p align="center">
+  <a href="https://cosmicwallet.io">
+    <img alt="Cosmic Wallet" src="./public/favicon/logo192.png" style="border-radius: 50%"/>
+  </a>
+</p>
+
+[//]: # (# Cosmic Wallet)
+
+<h1 style="color: #b68f55"> Cosmic Wallet </h1>
+
+This functions as a browser extension and a web app.
 
 
-### Start Browser App (not extension)
+.
+
+.
+
+
+<h3 style="color: #6495ac"> Start Web App </h3>
+
 ```shell
-yarn start:app
+yarn && yarn start:app
 ```
 
 
@@ -11,7 +28,8 @@ yarn start:app
 .
 
 
-### Upload Development Chrome Extension
+<h3 style="color: #6495ac"> Upload Chrome Extension - Development </h3>
+
 1. 
 Run `yarn build:ext`
 
@@ -32,7 +50,8 @@ Click `Load unpacked` and upload the `dist` folder
 .
 
 
-### Upload Production Chrome Extension
+<h3 style="color: #6495ac"> Upload Chrome Extension - Production </h3>
+
 TODO
 Must be manifest V3
 I think it's a zip of the `dist` that is published to chrome web store
@@ -43,7 +62,8 @@ I think it's a zip of the `dist` that is published to chrome web store
 .
 
 
-### TODO
+<h3 style="color: yellow"> TODO </h3>
+
 - [ ] Impl SOL transfer logic, UI to setup trx, popup to sign transaction
 - [ ] Impl SPL transfer logic, UI to setup trx, popup to sign transaction
 - [ ] Impl player profile adapter logic to `CosmicWallet`
