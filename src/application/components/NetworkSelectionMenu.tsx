@@ -36,7 +36,7 @@ export const WebNetworkSelectionMenu = observer(() => {
         }}
       />
       <StyledButton onClick={(e: any) => setAnchorEl(e.target)}>
-        <Typography variant="h3">
+        <Typography variant="h2">
           {cluster?.label.toUpperCase() ?? "Network".toUpperCase()}
         </Typography>
       </StyledButton>

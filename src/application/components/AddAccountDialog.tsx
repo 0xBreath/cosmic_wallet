@@ -9,10 +9,12 @@ import {
   FormGroup,
   Switch,
   TextField,
+  Typography,
 } from "@mui/material";
 import { Keypair } from "@solana/web3.js";
 import { WalletSeedModel } from "../../core";
 import { observer } from "mobx-react";
+import { customTheme } from "../../shared";
 
 export type OnAddProps = {
   name: string;
@@ -49,8 +51,15 @@ export const AddAccountDialog = observer((props: AddAccountDialogProps) => {
         setPrivateKey("");
       }}
       onSubmit={() => onAdd({ name, importedAccount })}
+      PaperProps={{
+        style: {
+          background: customTheme.dark,
+        },
+      }}
     >
-      <DialogTitle>Add account</DialogTitle>
+      <DialogTitle>
+        <Typography variant="h3">Add account</Typography>
+      </DialogTitle>
       <DialogContent style={{ paddingTop: 16 }}>
         <div
           style={{

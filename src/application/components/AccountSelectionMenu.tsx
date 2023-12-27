@@ -67,7 +67,7 @@ export const WebAccountSelectionMenu = observer(
           onClose={() => setDeleteMnemonicOpen(false)}
         />
         <StyledButton onClick={(e: any) => setAnchorEl(e.target)}>
-          <Typography variant="h3">{"Account".toUpperCase()}</Typography>
+          <Typography variant="h2">{"Account".toUpperCase()}</Typography>
         </StyledButton>
         <Menu
           anchorEl={anchorEl}
