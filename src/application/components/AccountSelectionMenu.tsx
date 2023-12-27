@@ -25,7 +25,7 @@ import {
   ImportExportOutlined,
 } from "@mui/icons-material";
 import { customTheme, shortenAddress, WalletAccountData } from "../../shared";
-import { NavigationActionButton } from "./NavigationActionButton";
+import { NavigationActionButton, StyledButton, StyledListItemIcon } from ".";
 
 export const WebAccountSelectionMenu = observer(
   (): React.JSX.Element | null => {
@@ -242,22 +242,6 @@ export const ExtensionAccountSelectionMenu = observer(
     );
   },
 );
-
-const StyledListItemIcon: typeof ListItemIcon = styled(ListItemIcon)(
-  ({ theme }) => ({
-    minWidth: 32,
-  }),
-);
-
-const StyledButton = styled("button")(({ theme }: { theme: Theme }) => ({
-  marginLeft: 1,
-  backgroundColor: customTheme.gold,
-  border: `1px solid ${customTheme.dark}`,
-  borderRadius: "10px",
-  padding: "5px 10px",
-  height: "60px",
-  width: "150px",
-}));
 
 const Text = styled("span")(({ theme }) => ({
   color: customTheme.dark,

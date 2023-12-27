@@ -17,41 +17,21 @@ import {
   Typography,
 } from "@mui/material";
 import {
-  AddAccountDialog,
-  AddCustomClusterDialog,
   ConnectionIcon,
   CosmicWalletIcon,
-  DeleteMnemonicDialog,
-  ExportMnemonicDialog,
-  SolanaIcon,
-  ExtensionNavigation,
   WebAccountSelectionMenu,
+  WebNetworkSelectionMenu,
+  StyledButton,
 } from ".";
-
 import {
-  AccountCircleOutlined,
-  AddOutlined,
-  CheckOutlined,
   CodeOutlined,
-  ExitToAppOutlined,
-  ImportExportOutlined,
   MonetizationOnOutlined,
   OpenInNewOutlined,
 } from "@mui/icons-material";
 
-import {
-  customTheme,
-  isExtension,
-  isExtensionPopup,
-  shortenAddress,
-  theme,
-  WalletAccountData,
-} from "../../shared";
+import { customTheme, isExtensionPopup } from "../../shared";
 import { useIsExtensionWidth } from "../hooks";
 import { Page, useConnectedWallets, usePage } from "../providers";
-import { ConnectionModel } from "../../core";
-import { CosmicWallet } from "../../wallet";
-import { observer } from "mobx-react";
 
 const Content = styled("div")(({ theme }) => ({
   flexGrow: 1,
@@ -60,36 +40,7 @@ const Content = styled("div")(({ theme }) => ({
     maxWidth: theme.breakpoints.values.ext,
     minWidth: theme.breakpoints.values.ext,
   },
-  // [theme.breakpoints.up(theme.breakpoints.values.ext)]: {
-  //   paddingTop: 3,
-  //   paddingLeft: 1,
-  //   paddingRight: 1,
-  // },
 }));
-
-const StyledButton = styled("button")(({ theme }: { theme: Theme }) => ({
-  marginLeft: 1,
-  backgroundColor: customTheme.gold,
-  border: `1px solid ${customTheme.dark}`,
-  borderRadius: "10px",
-  padding: "5px 10px",
-  height: "60px",
-  width: "150px",
-}));
-
-const Text = styled("span")(({ theme }) => ({
-  color: customTheme.dark,
-  fontSize: "22px",
-  fontFamily: customTheme.font.tungsten,
-  fontWeight: 600,
-  letterSpacing: "2px",
-}));
-
-const StyledListItemIcon: typeof ListItemIcon = styled(ListItemIcon)(
-  ({ theme }) => ({
-    minWidth: 32,
-  }),
-);
 
 const StyledBadge: typeof Badge = styled(Badge)(
   ({ theme }: { theme: Theme }) => ({
@@ -133,7 +84,6 @@ export function NavigationFrame({ children }: { children: React.ReactNode }) {
         </Toolbar>
       </AppBar>
       <Content>{children}</Content>
-      {!isExtensionWidth && <Footer />}
     </>
   );
 }
@@ -150,7 +100,7 @@ function navigationButtons(): React.JSX.Element[] {
   let elements: (React.JSX.Element | null)[] = [];
   if (page === Page.Wallet) {
     elements.push(<WebAccountSelectionMenu key={Math.random()} />);
-    elements.push(<NetworkSelector key={Math.random()} />);
+    elements.push(<WebNetworkSelectionMenu key={Math.random()} />);
   } else if (page === Page.Connections) {
     elements = [<WalletButton key={Math.random()} />];
   }
@@ -219,92 +169,3 @@ function ConnectionsButton() {
     </>
   );
 }
-
-function NetworkSelector() {
-  const cluster = ConnectionModel.instance.cluster;
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [addCustomNetworkOpen, setCustomNetworkOpen] = useState(false);
-
-  return (
-    <>
-      <AddCustomClusterDialog
-        open={addCustomNetworkOpen}
-        onClose={() => setCustomNetworkOpen(false)}
-        onAdd={({ name, apiUrl }) => {
-          ConnectionModel.instance.setCustomCluster(apiUrl, name);
-          setCustomNetworkOpen(false);
-        }}
-      />
-      <Hidden xsDown>
-        <StyledButton onClick={(e: any) => setAnchorEl(e.target)}>
-          <Text>{cluster?.label.toUpperCase() ?? "Network".toUpperCase()}</Text>
-        </StyledButton>
-      </Hidden>
-      <Hidden smUp>
-        <Tooltip title="Select Network" arrow>
-          <IconButton
-            color="inherit"
-            onClick={(e: any) => setAnchorEl(e.target)}
-          >
-            <SolanaIcon />
-          </IconButton>
-        </Tooltip>
-      </Hidden>
-      <Menu
-        anchorEl={anchorEl}
-        open={!!anchorEl}
-        onClose={() => setAnchorEl(null)}
-        anchorOrigin={{
-          vertical: "bottom",
-          horizontal: "right",
-        }}
-      >
-        {ConnectionModel.instance.clusters.map((option) => (
-          <MenuItem
-            key={option.httpEndPoint}
-            onClick={() => {
-              setAnchorEl(null);
-              ConnectionModel.instance.selectCluster(option.slug);
-            }}
-            selected={option.httpEndPoint === cluster.httpEndPoint}
-          >
-            <StyledListItemIcon>
-              {option.httpEndPoint === cluster.httpEndPoint ? (
-                <CheckOutlined fontSize="small" />
-              ) : null}
-            </StyledListItemIcon>
-            <Typography variant="h3">{option.label}</Typography>
-          </MenuItem>
-        ))}
-        <MenuItem
-          onClick={() => {
-            setCustomNetworkOpen(true);
-          }}
-        >
-          <StyledListItemIcon />
-          {ConnectionModel.instance.customClusterExists
-            ? "Edit Custom Endpoint"
-            : "Add Custom Endpoint"}
-        </MenuItem>
-      </Menu>
-    </>
-  );
-}
-
-const Footer = () => {
-  return (
-    <StyledFooter>
-      <Button
-        variant="outlined"
-        color="primary"
-        component="a"
-        target="_blank"
-        rel="noopener"
-        href="https://github.com/serum-foundation/spl-token-wallet"
-        startIcon={<CodeOutlined />}
-      >
-        View Source
-      </Button>
-    </StyledFooter>
-  );
-};

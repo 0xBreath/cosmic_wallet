@@ -8,6 +8,7 @@ import {
 } from "@mui/icons-material";
 import {
   ExtensionAccountSelectionMenu,
+  ExtensionNetworkSelectionMenu,
   NavigationActionButton,
   NetworkIcon,
 } from ".";
@@ -29,18 +30,8 @@ export const ExtensionNavigation = () => {
     >
       {/* Accounts */}
       <ExtensionAccountSelectionMenu />
-      {/*<NavigationActionButton*/}
-      {/*  icon={*/}
-      {/*    <FingerprintOutlined*/}
-      {/*      fontSize={"large"}*/}
-      {/*      htmlColor={customTheme.light}*/}
-      {/*    />*/}
-      {/*  }*/}
-      {/*/>*/}
       {/* Networks */}
-      <NavigationActionButton
-        icon={<NetworkIcon fontSize={"large"} htmlColor={customTheme.light} />}
-      />
+      <ExtensionNetworkSelectionMenu />
       {/* Connections */}
       <NavigationActionButton
         icon={

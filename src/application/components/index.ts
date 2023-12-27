@@ -15,3 +15,6 @@ export * from "./ExtensionNavigation";
 export * from "./icons";
 export * from "./AccountSelectionMenu";
 export * from "./NavigationActionButton";
+export * from "./StyledListItemIcon";
+export * from "./StyledButton";
+export * from "./NetworkSelectionMenu";
