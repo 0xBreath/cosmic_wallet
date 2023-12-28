@@ -60,6 +60,7 @@ export class CosmicWallet {
   /// Constants
   private static WALLET_SELECTOR_KEY = "walletSelector";
   private static WALLET_COUNT_KEY = "walletCount";
+  private static WALLET_NAMES_KEY = "walletNames";
 
   /// Models
   protected connectionModel = ConnectionModel.instance;
@@ -105,7 +106,7 @@ export class CosmicWallet {
     this.setWalletSelector = this.setWalletSelector.bind(this);
     this.setWalletCount = this.setWalletCount.bind(this);
     this.setWalletName = this.setWalletName.bind(this);
-    this.createReactions = this.createReactions.bind(this);
+    // this.createReactions = this.createReactions.bind(this);
     this.addAccount = this.addAccount.bind(this);
     this.setAccountName = this.setAccountName.bind(this);
     this.sendTransaction = this.sendTransaction.bind(this);
@@ -201,7 +202,7 @@ export class CosmicWallet {
           seed,
           walletIndex,
         ).publicKey;
-        const name = localStorage.getItem(`name${walletIndex}`);
+        const name = this.walletName(walletIndex);
         return { index: walletIndex, address, name };
       });
     };
@@ -258,25 +259,39 @@ export class CosmicWallet {
     const value: string | null = localStorage.getItem(
       CosmicWallet.WALLET_SELECTOR_KEY,
     );
-    if (!value) {
-      throw new Error(
-        "walletSelector should have been initialized with DEFAULT_WALLET_SELECTOR",
+    let selector: WalletSelector = DEFAULT_WALLET_SELECTOR;
+    if (value) {
+      selector = JSON.parse(value);
+    } else {
+      localStorage.setItem(
+        CosmicWallet.WALLET_SELECTOR_KEY,
+        JSON.stringify(selector),
       );
     }
-    this._walletSelector = JSON.parse(value);
+    if (JSON.stringify(this._walletSelector) !== JSON.stringify(selector)) {
+      this._walletSelector = selector;
+    }
     return this._walletSelector;
   }
 
-  setWalletSelector(value: WalletSelector | null) {
-    console.log("setWalletSelector", JSON.stringify(value));
+  setWalletSelector(value: WalletSelector | null): void {
+    console.log(
+      "select wallet:",
+      value.walletIndex,
+      "name:",
+      this.walletName(value.walletIndex),
+    );
     if (value === null) {
       localStorage.removeItem(CosmicWallet.WALLET_SELECTOR_KEY);
-      return;
+    } else {
+      localStorage.setItem(
+        CosmicWallet.WALLET_SELECTOR_KEY,
+        JSON.stringify(value),
+      );
     }
-    localStorage.setItem(
-      CosmicWallet.WALLET_SELECTOR_KEY,
-      JSON.stringify(value),
-    );
+    if (JSON.stringify(this._walletSelector) !== JSON.stringify(value)) {
+      this._walletSelector = value;
+    }
   }
 
   get walletCount(): number {
@@ -287,36 +302,74 @@ export class CosmicWallet {
       localStorage.setItem(CosmicWallet.WALLET_COUNT_KEY, "1");
       this._walletCount = 1;
     }
-    this._walletCount = JSON.parse(value);
-    console.log("get _walletCount", this._walletCount);
+    const parsedValue = JSON.parse(value);
+    if (this._walletCount !== parsedValue) {
+      this._walletCount = parsedValue;
+    }
     return this._walletCount;
   }
 
   setWalletCount(value: number | null): void {
     if (value === null) {
-      console.log("setWalletCount is null");
       localStorage.removeItem(CosmicWallet.WALLET_COUNT_KEY);
       return;
     }
     localStorage.setItem(CosmicWallet.WALLET_COUNT_KEY, JSON.stringify(value));
     this._walletCount = value;
-    console.log("set _walletCount = ", value);
+  }
+
+  walletName(walletIndex: number): string | null {
+    const value: string | null = localStorage.getItem(
+      CosmicWallet.WALLET_NAMES_KEY,
+    );
+    if (!value) {
+      const namesRecord: Record<number, string> = {};
+      localStorage.setItem(
+        CosmicWallet.WALLET_NAMES_KEY,
+        JSON.stringify(namesRecord),
+      );
+      return null;
+    } else {
+      const namesRecord: Record<number, string> = JSON.parse(value);
+      return namesRecord[walletIndex];
+    }
   }
 
   get walletNames(): string[] {
-    return [...Array(this.walletCount).keys()].map((idx) =>
-      localStorage.getItem(`name${idx}`),
+    const value: string | null = localStorage.getItem(
+      CosmicWallet.WALLET_NAMES_KEY,
     );
+    if (!value) {
+      const namesRecord: Record<number, string> = {};
+      localStorage.setItem(
+        CosmicWallet.WALLET_NAMES_KEY,
+        JSON.stringify(namesRecord),
+      );
+      return [];
+    } else {
+      const namesRecord: Record<number, string> = JSON.parse(value);
+      return Object.values(namesRecord);
+    }
   }
 
   /// Adds a wallet to local storage
-  setWalletName(walletIndex: number, name: string | null) {
-    if (name === null) {
-      console.log("setWalletName is null", walletIndex);
-      localStorage.removeItem(`name${walletIndex}`);
-    } else {
-      localStorage.setItem(`name${walletIndex}`, name);
+  setWalletName(walletIndex: number, name: string | null): void {
+    const cache: string | null = localStorage.getItem(
+      CosmicWallet.WALLET_NAMES_KEY,
+    );
+    let namesRecord: Record<number, string> = {};
+    if (cache !== null) {
+      namesRecord = JSON.parse(cache);
     }
+    if (name === null && namesRecord[walletIndex]) {
+      delete namesRecord[walletIndex];
+    } else {
+      namesRecord[walletIndex] = name;
+    }
+    localStorage.setItem(
+      CosmicWallet.WALLET_NAMES_KEY,
+      JSON.stringify(namesRecord),
+    );
   }
 
   // todo: this isn't auto running...
@@ -324,6 +377,10 @@ export class CosmicWallet {
     this._reactions.push(
       autorun(() => {
         this.create();
+      }),
+    );
+    this._reactions.push(
+      autorun(() => {
         this.refreshWalletAccounts();
       }),
     );
@@ -351,11 +408,19 @@ export class CosmicWallet {
         idx,
         derivationPath,
       ).publicKey;
-      let name = localStorage.getItem(`name${idx}`);
+      const name = this.walletName(idx);
       const selector: WalletSelector = {
         walletIndex: idx,
         importedPubkey: undefined,
       };
+      console.log(
+        "refreshWalletAccounts selected index",
+        this.walletSelector.walletIndex,
+        "idx",
+        idx,
+        "name",
+        name,
+      );
       return {
         selector,
         isSelected: this.walletSelector.walletIndex === idx,
@@ -382,12 +447,6 @@ export class CosmicWallet {
       };
     });
 
-    console.log(
-      "walletAccountsReaction",
-      derivedAccounts.length,
-      this.walletCount,
-      this.walletNames,
-    );
     this._walletAccounts = {
       accounts: derivedAccounts.concat(importedAccounts),
       derivedAccounts,
@@ -411,19 +470,7 @@ export class CosmicWallet {
     if (importedAccount === undefined) {
       const oldWalletCount = this.walletCount;
       this.setWalletName(oldWalletCount, name);
-      console.log("walletCount before", oldWalletCount);
       this.setWalletCount(oldWalletCount + 1);
-      console.log("walletCount after", this.walletCount);
-      console.log(
-        "Add account:",
-        name,
-        "LS:",
-        localStorage.getItem(`name${oldWalletCount}`),
-        "this.walletCount:",
-        this.walletCount,
-        "this._walletCount:",
-        this._walletCount,
-      );
     } else {
       const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
       const plaintext = importedAccount.secretKey;

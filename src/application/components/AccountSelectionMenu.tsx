@@ -243,6 +243,7 @@ const AccountListItem = ({
   setAnchorEl: any;
   setWalletSelector: any;
 }) => {
+  console.log("account", account.name, account.isSelected);
   return (
     <MenuItem
       key={account.address.toString()}
