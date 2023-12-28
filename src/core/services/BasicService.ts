@@ -1,5 +1,9 @@
-import {Idl, Program as AnchorProgram, Provider} from "@project-serum/anchor";
-import {Connection, PublicKey, TransactionConfirmationStatus,} from "@solana/web3.js";
+import { Idl, Program as AnchorProgram, Provider } from "@project-serum/anchor";
+import {
+  Connection,
+  PublicKey,
+  TransactionConfirmationStatus,
+} from "@solana/web3.js";
 import {
   Account,
   AccountClosedUpdate,
@@ -13,9 +17,12 @@ import {
   ProgramMethods,
   remapObject,
 } from "@staratlas/data-source";
-import {nanoid} from "nanoid";
-import {setIntervalAsync, SetIntervalAsyncTimer,} from "set-interval-async/dynamic";
-import {getNow} from "../../shared";
+import { nanoid } from "nanoid";
+import {
+  setIntervalAsync,
+  SetIntervalAsyncTimer,
+} from "set-interval-async/dynamic";
+import { getNow } from "../../shared";
 
 export type ServiceHandler<Accounts, AccountId extends keyof Accounts> = Record<
   AccountId,
@@ -112,7 +119,7 @@ export abstract class BasicService<
       [K in keyof Accounts]: Map<string, AccountUpdateHandler<Accounts[K]>>;
     };
   } {
-    console.log(
+    console.debug(
       `Constructing BasicService for program: ${
         this.idl.name
       } with public key: ${programId.toBase58()}`,

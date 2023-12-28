@@ -30,7 +30,6 @@ import { NavigationActionButton, StyledButton, StyledListItemIcon } from ".";
 export const WebAccountSelectionMenu = observer(
   (): React.JSX.Element | null => {
     const cosmicWallet = CosmicWallet.instance;
-    const { accounts, derivedAccounts } = cosmicWallet.walletAccounts;
     const { addAccount, setWalletSelector } = cosmicWallet;
 
     const [anchorEl, setAnchorEl] = useState(null);
@@ -38,7 +37,7 @@ export const WebAccountSelectionMenu = observer(
     const [deleteMnemonicOpen, setDeleteMnemonicOpen] = useState(false);
     const [exportMnemonicOpen, setExportMnemonicOpen] = useState(false);
 
-    if (accounts.length === 0) {
+    if (cosmicWallet.walletAccounts.accounts.length === 0) {
       return null;
     }
 
@@ -50,7 +49,9 @@ export const WebAccountSelectionMenu = observer(
           onAdd={({ name, importedAccount }) => {
             addAccount({ name, importedAccount });
             setWalletSelector({
-              walletIndex: importedAccount ? undefined : derivedAccounts.length,
+              walletIndex: importedAccount
+                ? undefined
+                : cosmicWallet.walletAccounts.derivedAccounts.length,
               importedPubkey: importedAccount
                 ? importedAccount.publicKey
                 : undefined,
@@ -78,7 +79,7 @@ export const WebAccountSelectionMenu = observer(
             horizontal: "right",
           }}
         >
-          {accounts.map((account) => (
+          {cosmicWallet.walletAccounts.accounts.map((account) => (
             <AccountListItem
               key={Math.random()}
               account={account}
@@ -129,7 +130,6 @@ export const WebAccountSelectionMenu = observer(
 export const ExtensionAccountSelectionMenu = observer(
   (): React.JSX.Element | null => {
     const cosmicWallet = CosmicWallet.instance;
-    const { accounts, derivedAccounts } = cosmicWallet.walletAccounts;
     const { addAccount, setWalletSelector } = cosmicWallet;
 
     const [anchorEl, setAnchorEl] = useState(null);
@@ -137,7 +137,7 @@ export const ExtensionAccountSelectionMenu = observer(
     const [deleteMnemonicOpen, setDeleteMnemonicOpen] = useState(false);
     const [exportMnemonicOpen, setExportMnemonicOpen] = useState(false);
 
-    if (accounts.length === 0) {
+    if (cosmicWallet.walletAccounts.accounts.length === 0) {
       return null;
     }
 
@@ -149,7 +149,9 @@ export const ExtensionAccountSelectionMenu = observer(
           onAdd={({ name, importedAccount }) => {
             addAccount({ name, importedAccount });
             setWalletSelector({
-              walletIndex: importedAccount ? undefined : derivedAccounts.length,
+              walletIndex: importedAccount
+                ? undefined
+                : cosmicWallet.walletAccounts.derivedAccounts.length,
               importedPubkey: importedAccount
                 ? importedAccount.publicKey
                 : undefined,
@@ -183,7 +185,7 @@ export const ExtensionAccountSelectionMenu = observer(
             horizontal: "right",
           }}
         >
-          {accounts.map((account) => (
+          {cosmicWallet.walletAccounts.accounts.map((account) => (
             <AccountListItem
               key={Math.random()}
               account={account}

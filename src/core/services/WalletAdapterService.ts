@@ -15,7 +15,6 @@ export class WalletAdapterService implements IWalletAdaptorService {
 
   private static _instance: WalletAdapterService;
   static get instance(): WalletAdapterService {
-    console.log("Init WalletAdapterService");
     if (!this._instance) {
       this._instance = new WalletAdapterService();
     }

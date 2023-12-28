@@ -15,6 +15,7 @@ import { Keypair } from "@solana/web3.js";
 import { WalletSeedModel } from "../../core";
 import { observer } from "mobx-react";
 import { customTheme } from "../../shared";
+import { CosmicWallet } from "../../wallet";
 
 export type OnAddProps = {
   name: string;
@@ -50,7 +51,10 @@ export const AddAccountDialog = observer((props: AddAccountDialogProps) => {
         setIsImport(false);
         setPrivateKey("");
       }}
-      onSubmit={() => onAdd({ name, importedAccount })}
+      // onSubmit={() => {
+      //   console.log("onSubmit auto");
+      //   onAdd({ name, importedAccount });
+      // }}
       PaperProps={{
         style: {
           background: customTheme.dark,
@@ -58,7 +62,7 @@ export const AddAccountDialog = observer((props: AddAccountDialogProps) => {
       }}
     >
       <DialogTitle>
-        <Typography variant="h3">Add account</Typography>
+        <Typography variant="h2">Add account</Typography>
       </DialogTitle>
       <DialogContent style={{ paddingTop: 16 }}>
         <div
@@ -75,6 +79,9 @@ export const AddAccountDialog = observer((props: AddAccountDialogProps) => {
             value={name}
             onChange={(e: any) => {
               setName(e.target.value);
+            }}
+            sx={{
+              zIndex: 2,
             }}
           />
           <FormGroup>
@@ -103,7 +110,12 @@ export const AddAccountDialog = observer((props: AddAccountDialogProps) => {
       </DialogContent>
       <DialogActions>
         <Button onClick={onClose}>Close</Button>
-        <Button type="submit" color="primary" disabled={!isAddEnabled}>
+        <Button
+          type="submit"
+          color="primary"
+          disabled={!isAddEnabled}
+          onClick={() => onAdd({ name, importedAccount })}
+        >
           Add
         </Button>
       </DialogActions>

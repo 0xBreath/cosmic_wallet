@@ -42,7 +42,6 @@ export class ConnectionModel {
   private static _instance: ConnectionModel;
   static get instance(): ConnectionModel {
     if (!this._instance) {
-      console.log("Init ConnectionModel");
       this._instance = new ConnectionModel();
     }
     return this._instance;

@@ -46,7 +46,6 @@ export class CosmicWallet {
   private static _instance: CosmicWallet;
   static get instance(): CosmicWallet {
     if (!this._instance) {
-      console.log("Init CosmicWallet");
       this._instance = new CosmicWallet();
     }
     return this._instance;
@@ -82,6 +81,8 @@ export class CosmicWallet {
     derivedAccounts: [],
     importedAccounts: [],
   };
+  protected _walletCount: number | null = null;
+  protected _walletSelector: WalletSelector = DEFAULT_WALLET_SELECTOR;
 
   /// Token balance management
   protected _tokenAccounts: Account[] = [];
@@ -89,7 +90,6 @@ export class CosmicWallet {
   protected _tokenBalances: Map<string, ParsedTokenBalance> = observable.map(
     new Map(),
   );
-
   /// Reactions
   protected _reactions: any[] = [];
 
@@ -110,11 +110,11 @@ export class CosmicWallet {
     this.create = this.create.bind(this);
     this.connect = this.connect.bind(this);
     this.initSigner = this.initSigner.bind(this);
-    this.walletAccountsReaction = this.walletAccountsReaction.bind(this);
+    this.refreshWalletAccounts = this.refreshWalletAccounts.bind(this);
     this.fetchAllTokenAccounts = this.fetchAllTokenAccounts.bind(this);
-    this.walletAccountsReaction = this.walletAccountsReaction.bind(this);
     this.logTransactionResult = this.logTransactionResult.bind(this);
     this.formatExplorerAccountLink = this.formatExplorerAccountLink.bind(this);
+    this.walletCount = this.walletCount.bind(this);
 
     this.create();
     this.setWalletSelector(DEFAULT_WALLET_SELECTOR);
@@ -212,7 +212,7 @@ export class CosmicWallet {
         this.walletSelector.walletIndex,
         derivationPath,
       );
-      console.log("Init CosmicWallet signer from seed");
+      console.debug("Init CosmicWallet signer from seed");
       this.signer = keypairToAsyncSigner(account);
     } else if (this.walletSelector.importedPubkey && importsEncryptionKey) {
       const { nonce, ciphertext } =
@@ -225,7 +225,7 @@ export class CosmicWallet {
         importsEncryptionKey,
       );
       if (secret) {
-        console.log("Init CosmicWallet signer from imported secret");
+        console.debug("Init CosmicWallet signer from imported secret");
         this.signer = keypairToAsyncSigner(Keypair.fromSecretKey(secret));
       } else {
         console.error("Failed to find imported wallet secret");
@@ -258,7 +258,8 @@ export class CosmicWallet {
         "walletSelector should have been initialized with DEFAULT_WALLET_SELECTOR",
       );
     }
-    return JSON.parse(value);
+    this._walletSelector = JSON.parse(value);
+    return this._walletSelector;
   }
 
   setWalletSelector(value: WalletSelector | null) {
@@ -273,66 +274,59 @@ export class CosmicWallet {
     );
   }
 
-  get walletCount(): number {
+  walletCount(): number {
     const value: string | null = localStorage.getItem(
       CosmicWallet.WALLET_COUNT_KEY,
     );
     if (!value) {
-      console.warn("Wallet count is not initialized");
       return 1;
     }
-    return JSON.parse(value);
+    this._walletCount = JSON.parse(value);
+    return this._walletCount;
   }
 
   setWalletCount(value: number | null): void {
     if (value === null) {
+      console.log("setWalletCount is null");
       localStorage.removeItem(CosmicWallet.WALLET_COUNT_KEY);
       return;
     }
     localStorage.setItem(CosmicWallet.WALLET_COUNT_KEY, JSON.stringify(value));
+    this._walletCount = value;
   }
 
-  get walletNames(): string {
-    return JSON.stringify(
-      [...Array(this.walletCount).keys()].map((idx) =>
-        localStorage.getItem(`name${idx}`),
-      ),
+  get walletNames(): string[] {
+    return [...Array(this.walletCount()).keys()].map((idx) =>
+      localStorage.getItem(`name${idx}`),
     );
   }
 
   /// Adds a wallet to local storage
   setWalletName(walletIndex: number, name: string | null) {
     if (name === null) {
+      console.log("setWalletName is null", walletIndex);
       localStorage.removeItem(`name${walletIndex}`);
     } else {
       localStorage.setItem(`name${walletIndex}`, name);
     }
   }
 
+  // todo: this isn't auto running...
   createReactions(): void {
     this._reactions.push(
       autorun(() => {
-        // console.log(
-        //   "CosmicWallet autorun unlocked seed?",
-        //   JSON.stringify(this.seedModel.currentUnlockedMnemonicAndSeed),
-        // );
         this.create();
-        this.walletAccountsReaction();
+        this.refreshWalletAccounts();
       }),
     );
   }
 
-  walletAccountsReaction(): void {
+  refreshWalletAccounts(): void {
     if (!this.seedModel.currentUnlockedMnemonicAndSeed) return;
     const { seed, derivationPath } =
       this.seedModel.currentUnlockedMnemonicAndSeed;
     if (!seed) {
-      console.log(
-        "walletCount",
-        this.walletCount,
-        JSON.stringify(this.seedModel.currentUnlockedMnemonicAndSeed),
-      );
-      console.log("accounts reaction empty");
+      console.warn("Missing or locked seed, walletCount", this.walletCount());
       this._walletAccounts = {
         accounts: [],
         derivedAccounts: [],
@@ -342,7 +336,7 @@ export class CosmicWallet {
     }
 
     const derivedAccounts: WalletAccountData[] = [
-      ...Array(this.walletCount).keys(),
+      ...Array(this.walletCount()).keys(),
     ].map((idx) => {
       let address = this.seedModel.seedToKeypair(
         seed,
@@ -380,6 +374,12 @@ export class CosmicWallet {
       };
     });
 
+    console.log(
+      "walletAccountsReaction",
+      derivedAccounts.length,
+      this.walletCount(),
+      this.walletNames,
+    );
     this._walletAccounts = {
       accounts: derivedAccounts.concat(importedAccounts),
       derivedAccounts,
@@ -401,20 +401,26 @@ export class CosmicWallet {
       return;
     }
     if (importedAccount === undefined) {
-      this.setWalletName(this.walletCount, name);
-      localStorage.setItem(`name${this.walletCount}`, name);
-      this.setWalletCount(this.walletCount + 1);
+      const oldWalletCount = this.walletCount();
+      this.setWalletName(this.walletCount(), name);
+      console.log("walletCount before", this.walletCount());
+      this.setWalletCount(this.walletCount() + 1);
+      console.log("walletCount after", this.walletCount());
       console.log(
         "Add account:",
-        localStorage.getItem(`name${this.walletCount}`),
-        ", at index:",
-        this.walletCount,
+        name,
+        "LS:",
+        localStorage.getItem(`name${oldWalletCount}`),
+        "this.walletCount:",
+        this.walletCount(),
+        "this._walletCount:",
+        this._walletCount,
       );
     } else {
       const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
       const plaintext = importedAccount.secretKey;
       const ciphertext = nacl.secretbox(plaintext, nonce, importsEncryptionKey);
-      // `useLocalStorageState` requires a new object.
+
       let newPrivateKeyImports = { ...this.seedModel.privateKeyImports };
       newPrivateKeyImports[importedAccount.publicKey.toString()] = {
         name,
@@ -423,6 +429,7 @@ export class CosmicWallet {
       };
       this.seedModel.setPrivateKeyImports(newPrivateKeyImports);
     }
+    this.refreshWalletAccounts();
   }
 
   setAccountName(selector: WalletSelector, newName: string): void {
@@ -433,6 +440,7 @@ export class CosmicWallet {
     } else if (selector.walletIndex) {
       this.setWalletName(selector.walletIndex, newName);
     }
+    this.refreshWalletAccounts();
   }
 
   diffieHellman(key: PublicKey): BoxKeyPair | null {

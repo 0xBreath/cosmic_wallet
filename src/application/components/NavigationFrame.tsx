@@ -32,6 +32,7 @@ import {
 import { customTheme, isExtensionPopup } from "../../shared";
 import { useIsExtensionWidth } from "../hooks";
 import { Page, useConnectedWallets, usePage } from "../providers";
+import { observer } from "mobx-react";
 
 const Content = styled("div")(({ theme }) => ({
   flexGrow: 1,
@@ -57,36 +58,38 @@ const StyledFooter = styled("footer")(({ theme }) => ({
   margin: 2,
 }));
 
-export function NavigationFrame({ children }: { children: React.ReactNode }) {
-  const isExtensionWidth = useIsExtensionWidth();
-  return (
-    <>
-      <AppBar position="static">
-        <Toolbar
-          style={{
-            opacity: 1,
-            backgroundColor: customTheme.dark,
-            padding: "20px",
-          }}
-        >
-          <IconButton>
-            <CosmicWalletIcon size={50} />
-          </IconButton>
-          <Typography
-            variant="h2"
+export const NavigationFrame = observer(
+  ({ children }: { children: React.ReactNode }) => {
+    const isExtensionWidth = useIsExtensionWidth();
+    return (
+      <>
+        <AppBar position="static">
+          <Toolbar
             style={{
-              flexGrow: 1,
+              opacity: 1,
+              backgroundColor: customTheme.dark,
+              padding: "20px",
             }}
           >
-            COSMIC WALLET
-          </Typography>
-          {!isExtensionWidth && navigationButtons().map((button) => button)}
-        </Toolbar>
-      </AppBar>
-      <Content>{children}</Content>
-    </>
-  );
-}
+            <IconButton>
+              <CosmicWalletIcon size={50} />
+            </IconButton>
+            <Typography
+              variant="h2"
+              style={{
+                flexGrow: 1,
+              }}
+            >
+              COSMIC WALLET
+            </Typography>
+            {!isExtensionWidth && navigationButtons().map((button) => button)}
+          </Toolbar>
+        </AppBar>
+        <Content>{children}</Content>
+      </>
+    );
+  },
+);
 
 function navigationButtons(): React.JSX.Element[] {
   const isExtensionWidth = useIsExtensionWidth();

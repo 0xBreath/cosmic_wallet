@@ -65,7 +65,6 @@ export class WalletSeedModel {
 
     this.createReactions();
     this.setPrivateKeyImports({} as Record<string, PrivateKeyImport>);
-    console.log("Init WalletSeedModel");
   }
 
   /// Just return unlocked mnemonic and seed
