@@ -9,12 +9,10 @@ export const customTheme = {
   dark2: "#19191e",
 
   gold: "#b68f55",
-  // gold: "#D1B464",
   orange: "#e77517",
   red: "#924a3b",
   cocoa: "#1f1108",
-  // lunarDark: "#667a83",
-  // lunarDark: "#0a0e11",
+  lunar: "#667a83",
 
   success: "#79B77AFF",
   error: "#d27272",
@@ -104,6 +102,43 @@ export const theme: Theme = createTheme({
       fontWeight: 400,
       lineHeight: "1.25rem",
       textTransform: "none",
+    },
+  },
+  components: {
+    MuiMenu: {
+      styleOverrides: {
+        list: {
+          backgroundColor: customTheme.dark,
+        },
+      },
+    },
+    MuiDialog: {
+      styleOverrides: {
+        root: {
+          backgroundColor: customTheme.dark,
+        },
+      },
+    },
+    MuiDialogContent: {
+      styleOverrides: {
+        root: {
+          backgroundColor: customTheme.dark,
+        },
+      },
+    },
+    MuiDialogTitle: {
+      styleOverrides: {
+        root: {
+          backgroundColor: customTheme.dark,
+        },
+      },
+    },
+    MuiDialogActions: {
+      styleOverrides: {
+        root: {
+          backgroundColor: customTheme.dark,
+        },
+      },
     },
   },
 });

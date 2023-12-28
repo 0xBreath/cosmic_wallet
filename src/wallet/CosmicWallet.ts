@@ -275,12 +275,6 @@ export class CosmicWallet {
   }
 
   setWalletSelector(value: WalletSelector | null): void {
-    console.log(
-      "select wallet:",
-      value.walletIndex,
-      "name:",
-      this.walletName(value.walletIndex),
-    );
     if (value === null) {
       localStorage.removeItem(CosmicWallet.WALLET_SELECTOR_KEY);
     } else {
@@ -413,14 +407,6 @@ export class CosmicWallet {
         walletIndex: idx,
         importedPubkey: undefined,
       };
-      console.log(
-        "refreshWalletAccounts selected index",
-        this.walletSelector.walletIndex,
-        "idx",
-        idx,
-        "name",
-        name,
-      );
       return {
         selector,
         isSelected: this.walletSelector.walletIndex === idx,
