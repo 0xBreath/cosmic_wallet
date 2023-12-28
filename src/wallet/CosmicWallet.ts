@@ -25,7 +25,13 @@ import {
   WalletAdapterService,
   WalletSeedModel,
 } from "../core";
-import { autorun, makeAutoObservable, observable, runInAction } from "mobx";
+import {
+  autorun,
+  computed,
+  makeAutoObservable,
+  observable,
+  runInAction,
+} from "mobx";
 import {
   AsyncSigner,
   buildAndSignTransaction,
@@ -114,7 +120,6 @@ export class CosmicWallet {
     this.fetchAllTokenAccounts = this.fetchAllTokenAccounts.bind(this);
     this.logTransactionResult = this.logTransactionResult.bind(this);
     this.formatExplorerAccountLink = this.formatExplorerAccountLink.bind(this);
-    this.walletCount = this.walletCount.bind(this);
 
     this.create();
     this.setWalletSelector(DEFAULT_WALLET_SELECTOR);
@@ -274,14 +279,16 @@ export class CosmicWallet {
     );
   }
 
-  walletCount(): number {
+  get walletCount(): number {
     const value: string | null = localStorage.getItem(
       CosmicWallet.WALLET_COUNT_KEY,
     );
     if (!value) {
-      return 1;
+      localStorage.setItem(CosmicWallet.WALLET_COUNT_KEY, "1");
+      this._walletCount = 1;
     }
     this._walletCount = JSON.parse(value);
+    console.log("get _walletCount", this._walletCount);
     return this._walletCount;
   }
 
@@ -293,10 +300,11 @@ export class CosmicWallet {
     }
     localStorage.setItem(CosmicWallet.WALLET_COUNT_KEY, JSON.stringify(value));
     this._walletCount = value;
+    console.log("set _walletCount = ", value);
   }
 
   get walletNames(): string[] {
-    return [...Array(this.walletCount()).keys()].map((idx) =>
+    return [...Array(this.walletCount).keys()].map((idx) =>
       localStorage.getItem(`name${idx}`),
     );
   }
@@ -326,7 +334,7 @@ export class CosmicWallet {
     const { seed, derivationPath } =
       this.seedModel.currentUnlockedMnemonicAndSeed;
     if (!seed) {
-      console.warn("Missing or locked seed, walletCount", this.walletCount());
+      console.warn("Missing or locked seed, walletCount", this.walletCount);
       this._walletAccounts = {
         accounts: [],
         derivedAccounts: [],
@@ -336,7 +344,7 @@ export class CosmicWallet {
     }
 
     const derivedAccounts: WalletAccountData[] = [
-      ...Array(this.walletCount()).keys(),
+      ...Array(this.walletCount).keys(),
     ].map((idx) => {
       let address = this.seedModel.seedToKeypair(
         seed,
@@ -377,7 +385,7 @@ export class CosmicWallet {
     console.log(
       "walletAccountsReaction",
       derivedAccounts.length,
-      this.walletCount(),
+      this.walletCount,
       this.walletNames,
     );
     this._walletAccounts = {
@@ -401,18 +409,18 @@ export class CosmicWallet {
       return;
     }
     if (importedAccount === undefined) {
-      const oldWalletCount = this.walletCount();
-      this.setWalletName(this.walletCount(), name);
-      console.log("walletCount before", this.walletCount());
-      this.setWalletCount(this.walletCount() + 1);
-      console.log("walletCount after", this.walletCount());
+      const oldWalletCount = this.walletCount;
+      this.setWalletName(oldWalletCount, name);
+      console.log("walletCount before", oldWalletCount);
+      this.setWalletCount(oldWalletCount + 1);
+      console.log("walletCount after", this.walletCount);
       console.log(
         "Add account:",
         name,
         "LS:",
         localStorage.getItem(`name${oldWalletCount}`),
         "this.walletCount:",
-        this.walletCount(),
+        this.walletCount,
         "this._walletCount:",
         this._walletCount,
       );
