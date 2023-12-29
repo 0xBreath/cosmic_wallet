@@ -19,6 +19,7 @@ import {
   WalletAccountData,
   WalletAccounts,
   WalletSelector,
+  RefreshState,
 } from "../shared";
 import {
   ConnectionModel,
@@ -100,6 +101,7 @@ export class CosmicWallet {
   protected _tokenBalances: Map<string, ParsedTokenBalance> = observable.map(
     new Map(),
   );
+  refreshTokenState = RefreshState.Ready;
   /// Reactions
   protected _reactions: any[] = [];
   protected _asyncPolls: any[] = [];
@@ -219,9 +221,6 @@ export class CosmicWallet {
         return { index: walletIndex, address, name };
       });
     };
-
-    this.refreshSolanaBalance();
-    this.refreshTokenBalances();
   }
 
   initSigner(): void {
@@ -240,10 +239,6 @@ export class CosmicWallet {
       this.signer = keypairToAsyncSigner(account);
       this.refreshEverything();
     } else if (this.walletSelector.importedPubkey && importsEncryptionKey) {
-      console.log(
-        "initSigner: ",
-        this.walletSelector.importedPubkey.toString(),
-      );
       const { nonce, ciphertext } =
         this.seedModel.privateKeyImports[
           this.walletSelector.importedPubkey.toString()
@@ -499,9 +494,7 @@ export class CosmicWallet {
       };
       this.seedModel.setPrivateKeyImports(newPrivateKeyImports);
     }
-    this.refreshWalletAccounts();
-    this.refreshSolanaBalance();
-    this.refreshTokenBalances();
+    this.refreshEverything();
   }
 
   setAccountName(selector: WalletSelector, newName: string): void {
@@ -527,6 +520,13 @@ export class CosmicWallet {
    *
    */
 
+  async refreshEverything(): Promise<void> {
+    await this.refreshSolanaBalance();
+    await this.refreshTokenBalances();
+    await this.refreshWalletAccounts();
+    await this.fetchAllTokenAccounts();
+  }
+
   // todo: deprecate this
   async fetchAllTokenAccounts(): Promise<void> {
     if (!this.publicKey) return;
@@ -537,23 +537,16 @@ export class CosmicWallet {
   }
 
   get solanaBalance(): number {
-    return this._solanaBalanceInLamports / LAMPORTS_PER_SOL;
-  }
-
-  async refreshEverything(): Promise<void> {
-    await this.refreshSolanaBalance();
-    await this.refreshTokenBalances();
-    await this.refreshWalletAccounts();
-    await this.fetchAllTokenAccounts();
+    return Number(
+      (this._solanaBalanceInLamports / LAMPORTS_PER_SOL).toFixed(2),
+    );
   }
 
   async refreshSolanaBalance(): Promise<void> {
     if (!this.publicKey) return;
-
     const balance = await this.connectionModel.connection.getBalance(
       this.publicKey,
     );
-
     this._solanaBalanceInLamports = balance;
   }
 
@@ -564,16 +557,18 @@ export class CosmicWallet {
   async refreshTokenBalances(): Promise<void> {
     if (!this.publicKey) return;
 
+    this.refreshTokenState = RefreshState.Pending;
     const balances = await getParsedTokenBalancesForKey(
       this.connectionModel.connection,
       this.publicKey,
     );
 
     runInAction(() => {
-      console.log("refreshing token balances...");
       for (const balance of balances) {
         this._tokenBalances.set(balance.mint, balance);
       }
+      console.log("refreshed token balances");
+      this.refreshTokenState = RefreshState.Ready;
     });
   }
 

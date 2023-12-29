@@ -2,8 +2,8 @@ import * as React from "react";
 import { BottomNavigation } from "@mui/material";
 import { customTheme } from "../../shared";
 import {
-  FingerprintOutlined,
-  AspectRatioOutlined,
+  SwapHorizOutlined,
+  HistoryOutlined,
   GridViewOutlined,
 } from "@mui/icons-material";
 import {
@@ -22,7 +22,7 @@ export const ExtensionNavigation = () => {
         position: "fixed",
         width: "100%",
         flexGrow: 1,
-        height: "10%",
+        height: "60px",
         zIndex: 10,
         bottom: 0,
         backgroundColor: customTheme.dark2,
@@ -32,23 +32,23 @@ export const ExtensionNavigation = () => {
       <ExtensionAccountSelectionMenu />
       {/* Networks */}
       <ExtensionNetworkSelectionMenu />
-      {/* Connections */}
+      {/* TODO: Swap Tokens */}
+      <NavigationActionButton
+        icon={
+          <SwapHorizOutlined fontSize="large" htmlColor={customTheme.light} />
+        }
+      />
+      {/* TODO: Transaction History */}
+      <NavigationActionButton
+        icon={
+          <HistoryOutlined fontSize="large" htmlColor={customTheme.light} />
+        }
+      />
+      {/* TODO: Connected Apps */}
       <NavigationActionButton
         icon={
           <GridViewOutlined fontSize="large" htmlColor={customTheme.light} />
         }
-      />
-      {/* Expand View (open web app) */}
-      <NavigationActionButton
-        icon={
-          <AspectRatioOutlined
-            fontSize={"large"}
-            htmlColor={customTheme.light}
-          />
-        }
-        onClick={() => {
-          window.open(chrome.extension.getURL("src/index.html"), "_blank");
-        }}
       />
     </BottomNavigation>
   );

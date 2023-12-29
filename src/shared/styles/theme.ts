@@ -4,7 +4,7 @@ import { createTheme, Theme } from "@mui/material";
 export const customTheme = {
   light: "#e9e9e7",
   cream: "#fcecca",
-  grey: "#a79d8a",
+  grey: "#38342e",
   dark: "#121215",
   dark2: "#19191e",
 
@@ -13,13 +13,13 @@ export const customTheme = {
   red: "#924a3b",
   cocoa: "#1f1108",
   lunar: "#667a83",
+  lunarDark: "#394246",
 
   success: "#79B77AFF",
   error: "#d27272",
 
   font: {
     industry: "industryMedium",
-    graphik: "graphikMedium",
     tungsten: "tungstenBook",
   },
 };
@@ -65,7 +65,7 @@ export const theme: Theme = createTheme({
       md: 900,
       lg: 1200,
       xl: 1536,
-      ext: 450, // extension popup width
+      ext: 451, // extension popup width
     },
   },
   typography: {

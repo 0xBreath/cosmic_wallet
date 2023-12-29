@@ -19,3 +19,4 @@ export * from "./StyledListItemIcon";
 export * from "./StyledButton";
 export * from "./NetworkSelectionMenu";
 export * from "./Portfolio";
+export * from "./ExpandViewButton";

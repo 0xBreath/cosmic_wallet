@@ -1,36 +1,35 @@
 import React from "react";
-import { Container, Grid, styled } from "@mui/material";
-import { useIsExtensionWidth } from "../hooks";
-import { theme } from "../../shared";
+import { Grid, styled } from "@mui/material";
+// import { useIsExtensionWidth } from "../hooks";
+import { customTheme, EXTENSION_WIDTH, theme } from "../../shared";
 import { Portfolio } from "../components";
 
-const StyledContainer: typeof Container = styled(Container)(
-  ({ theme: Theme }) => ({
-    [theme.breakpoints.down(theme.breakpoints.values.ext)]: {
-      padding: "20px",
-      minHeight: "400px",
-      maxWidth: theme.breakpoints.values.ext,
-      minWidth: theme.breakpoints.values.ext,
-    },
-    [theme.breakpoints.up(theme.breakpoints.values.ext)]: {
-      maxWidth: theme.breakpoints.values.md,
-    },
-  }),
-);
+export const Container = styled("div")(({ theme }) => ({
+  [theme.breakpoints.up(theme.breakpoints.values.ext)]: {
+    width: "100%",
+  },
+  [theme.breakpoints.down(theme.breakpoints.values.ext)]: {
+    width: EXTENSION_WIDTH,
+    marginBottom: "60px",
+  },
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
+}));
 
 const StyledGrid: typeof Grid = styled(Grid)(({ theme: Theme }) => ({
   [theme.breakpoints.down(theme.breakpoints.values.ext)]: {
     marginBottom: 24,
   },
+  width: "100%",
 }));
 
 export function WalletPage() {
-  const isExtensionWidth = useIsExtensionWidth();
   return (
-    <Grid container spacing={isExtensionWidth ? 0 : 3}>
+    <Container>
       <StyledGrid item xs={12}>
         <Portfolio />
       </StyledGrid>
-    </Grid>
+    </Container>
   );
 }

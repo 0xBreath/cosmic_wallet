@@ -117,17 +117,22 @@ export class WalletSeedModel {
       WalletSeedModel.PRIVATE_KEY_IMPORTS_KEY,
     );
     if (!value) {
-      throw new Error(
-        "privateKeyImports should have been initialized with empty object",
+      const parsedValue = {} as Record<string, PrivateKeyImport>;
+      localStorage.setItem(
+        WalletSeedModel.PRIVATE_KEY_IMPORTS_KEY,
+        JSON.stringify(parsedValue),
       );
-    }
-    const parsedValue = JSON.parse(value);
-    if (
-      JSON.stringify(this._privateKeyImports) !== JSON.stringify(parsedValue)
-    ) {
       this._privateKeyImports = parsedValue;
+      return this._privateKeyImports;
+    } else {
+      const parsedValue = JSON.parse(value);
+      if (
+        JSON.stringify(this._privateKeyImports) !== JSON.stringify(parsedValue)
+      ) {
+        this._privateKeyImports = parsedValue;
+      }
+      return this._privateKeyImports;
     }
-    return this._privateKeyImports;
   }
 
   setPrivateKeyImports(value: Record<string, PrivateKeyImport> | null): void {

@@ -3,13 +3,8 @@ import { useState } from "react";
 import {
   AppBar,
   Badge,
-  Button,
-  Divider,
   Hidden,
   IconButton,
-  ListItemIcon,
-  Menu,
-  MenuItem,
   styled,
   Theme,
   Toolbar,
@@ -22,24 +17,29 @@ import {
   WebAccountSelectionMenu,
   WebNetworkSelectionMenu,
   StyledButton,
+  NavigationActionButton,
+  ExpandViewButton,
 } from ".";
 import {
-  CodeOutlined,
+  AspectRatioOutlined,
   MonetizationOnOutlined,
-  OpenInNewOutlined,
 } from "@mui/icons-material";
 
-import { customTheme, isExtensionPopup } from "../../shared";
-import { useIsExtensionWidth } from "../hooks";
+import {
+  customTheme,
+  EXTENSION_WIDTH,
+  isExtension,
+  isExtensionPopup,
+} from "../../shared";
 import { Page, useConnectedWallets, usePage } from "../providers";
 import { observer } from "mobx-react";
+import { useIsExtensionWidth } from "../hooks";
 
 const Content = styled("div")(({ theme }) => ({
-  flexGrow: 1,
   [theme.breakpoints.down(theme.breakpoints.values.ext)]: {
     minHeight: "500px",
-    maxWidth: theme.breakpoints.values.ext,
-    minWidth: theme.breakpoints.values.ext,
+    maxWidth: EXTENSION_WIDTH,
+    minWidth: EXTENSION_WIDTH,
   },
 }));
 
@@ -51,12 +51,6 @@ const StyledBadge: typeof Badge = styled(Badge)(
     width: 16,
   }),
 );
-
-const StyledFooter = styled("footer")(({ theme }) => ({
-  display: "flex",
-  justifyContent: "flex-end",
-  margin: 2,
-}));
 
 export const NavigationFrame = observer(
   ({ children }: { children: React.ReactNode }) => {
@@ -82,7 +76,11 @@ export const NavigationFrame = observer(
             >
               COSMIC WALLET
             </Typography>
-            {!isExtensionWidth && navigationButtons().map((button) => button)}
+            {isExtensionWidth ? (
+              <ExpandViewButton />
+            ) : (
+              navigationButtons().map((button) => button)
+            )}
           </Toolbar>
         </AppBar>
         <Content>{children}</Content>
@@ -92,11 +90,11 @@ export const NavigationFrame = observer(
 );
 
 function navigationButtons(): React.JSX.Element[] {
-  const isExtensionWidth = useIsExtensionWidth();
+  // const isExtensionWidth = useIsExtensionWidth();
   const { page } = usePage();
   const [anchorEl, setAnchorEl] = useState(null);
 
-  if (isExtensionPopup || isExtensionWidth) {
+  if (isExtensionPopup || isExtension) {
     return [];
   }
 

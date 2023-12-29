@@ -63,5 +63,7 @@ export type LockedMnemonicAndSeed = {
   loading: boolean;
 };
 
-// CosmicWalletAdapter extends SignerWalletAdapterProps
-// add field CosmicWalletAdapterProps
+export enum RefreshState {
+  Pending = "pending",
+  Ready = "ready",
+}

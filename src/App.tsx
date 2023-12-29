@@ -52,16 +52,14 @@ export const App = observer(() => {
 
   return (
     <Suspense fallback={<LoadingIndicator />}>
-      <ThemeProvider theme={theme}>
-        <CssBaseline />
-        <ConnectionProvider endpoint={wallet.connection.rpcEndpoint}>
-          <TokenRegistryProvider>
-            <WalletProvider wallets={wallet.supportedWallets}>
-              {env}
-            </WalletProvider>
-          </TokenRegistryProvider>
-        </ConnectionProvider>
-      </ThemeProvider>
+      <CssBaseline />
+      <ConnectionProvider endpoint={wallet.connection.rpcEndpoint}>
+        <TokenRegistryProvider>
+          <WalletProvider wallets={wallet.supportedWallets}>
+            {env}
+          </WalletProvider>
+        </TokenRegistryProvider>
+      </ConnectionProvider>
     </Suspense>
   );
 });
