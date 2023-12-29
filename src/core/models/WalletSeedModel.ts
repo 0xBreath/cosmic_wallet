@@ -39,6 +39,7 @@ export class WalletSeedModel {
   currentUnlockedMnemonicAndSeed: MnemonicAndSeed | null = null;
   walletSeedChanged = new EventEmitter();
   protected _reactions: any[] = [];
+  protected _privateKeyImports: Record<string, PrivateKeyImport> = {};
 
   constructor() {
     makeAutoObservable(this);
@@ -121,7 +122,25 @@ export class WalletSeedModel {
         "privateKeyImports should have been initialized with empty object",
       );
     }
-    return JSON.parse(value);
+    const parsedValue = JSON.parse(value);
+    if (
+      JSON.stringify(this._privateKeyImports) !== JSON.stringify(parsedValue)
+    ) {
+      this._privateKeyImports = parsedValue;
+    }
+    return this._privateKeyImports;
+  }
+
+  setPrivateKeyImports(value: Record<string, PrivateKeyImport> | null): void {
+    if (value === null) {
+      localStorage.removeItem(WalletSeedModel.PRIVATE_KEY_IMPORTS_KEY);
+      return;
+    }
+    const serValue = JSON.stringify(value);
+    localStorage.setItem(WalletSeedModel.PRIVATE_KEY_IMPORTS_KEY, serValue);
+    if (JSON.stringify(this._privateKeyImports) !== serValue) {
+      this._privateKeyImports = value;
+    }
   }
 
   /// Returns the 32 byte key used to encrypt imported private keys.
@@ -354,15 +373,27 @@ export class WalletSeedModel {
   }
 
   /**
-   * Returns an account object when given the private key
+   * Returns a `Keypair` when given the private key.
+   *
+   * Accepts either a Buffer (byte array), which Solana stores in JSON.
+   *
+   * Or accepts the private key as a string, which will be decoded into the Buffer (byte array).
    */
   public decodeKeypair(privateKey: string): Keypair | undefined {
     try {
-      return Keypair.fromSecretKey(new Uint8Array(JSON.parse(privateKey)));
-    } catch (_) {
+      const keypair = Keypair.fromSecretKey(
+        new Uint8Array(JSON.parse(privateKey)),
+      );
+      console.log("add account from buffer", keypair.publicKey.toString());
+      return keypair;
+    } catch (e: any) {
       try {
-        return Keypair.fromSecretKey(new Uint8Array(bs58.decode(privateKey)));
-      } catch (_) {
+        const keypair = Keypair.fromSecretKey(
+          new Uint8Array(bs58.decode(privateKey)),
+        );
+        console.log("add account from string", keypair.publicKey.toString());
+        return keypair;
+      } catch (e: any) {
         return undefined;
       }
     }
@@ -408,17 +439,6 @@ export class WalletSeedModel {
       default:
         throw new Error(`invalid derivation path: ${derivationPath}`);
     }
-  }
-
-  setPrivateKeyImports(value: Record<string, PrivateKeyImport> | null) {
-    if (value === null) {
-      localStorage.removeItem(WalletSeedModel.PRIVATE_KEY_IMPORTS_KEY);
-      return;
-    }
-    localStorage.setItem(
-      WalletSeedModel.PRIVATE_KEY_IMPORTS_KEY,
-      JSON.stringify(value),
-    );
   }
 
   private setCurrentUnlockedMnemonicAndSeed(value: MnemonicAndSeed | null) {

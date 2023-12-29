@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { DialogForm } from "./DialogForm";
 import {
   Button,
@@ -6,6 +6,7 @@ import {
   DialogContent,
   DialogTitle,
   TextField,
+  Typography,
 } from "@mui/material";
 
 type OnAddProps = {
@@ -25,10 +26,12 @@ export const AddCustomClusterDialog = (props: AddCustomClusterDialogProps) => {
   const [name, setName] = useState("");
   const [apiUrl, setApiUrl] = useState("");
 
-  if (open) {
-    setName("");
-    setApiUrl("");
-  }
+  useEffect(() => {
+    if (open) {
+      setName("");
+      setApiUrl("");
+    }
+  }, []);
 
   return (
     <DialogForm
@@ -41,7 +44,9 @@ export const AddCustomClusterDialog = (props: AddCustomClusterDialogProps) => {
       onSubmit={() => onAdd({ name, apiUrl })}
       fullWidth
     >
-      <DialogTitle>Add Custom Network</DialogTitle>
+      <DialogTitle>
+        <Typography variant="h3">Add Custom Network</Typography>
+      </DialogTitle>
       <DialogContent style={{ paddingTop: 16 }}>
         <div
           style={{

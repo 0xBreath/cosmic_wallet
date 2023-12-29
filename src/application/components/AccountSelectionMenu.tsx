@@ -24,7 +24,12 @@ import {
   FingerprintOutlined,
   ImportExportOutlined,
 } from "@mui/icons-material";
-import { customTheme, shortenAddress, WalletAccountData } from "../../shared";
+import {
+  copyToClipboard,
+  customTheme,
+  shortenAddress,
+  WalletAccountData,
+} from "../../shared";
 import { NavigationActionButton, StyledButton, StyledListItemIcon } from ".";
 
 export const WebAccountSelectionMenu = observer(
@@ -249,6 +254,7 @@ const AccountListItem = ({
       onClick={() => {
         setAnchorEl(null);
         setWalletSelector(account.selector);
+        copyToClipboard(account.address.toString());
       }}
       selected={account.isSelected}
       component="div"

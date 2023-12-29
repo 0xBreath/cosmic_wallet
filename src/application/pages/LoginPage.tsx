@@ -34,18 +34,11 @@ export const LoginPage = observer(() => {
   const seedModel = WalletSeedModel.instance;
 
   const [restore, setRestore] = useState(false);
-  // const [hasLockedMnemonicAndSeed, loading] =
-  //   seedModel.hasLockedMnemonicAndSeed;
-
-  const [lockedMnemonicAndSeed, setHasLockedMAndS] =
-    useState<LockedMnemonicAndSeed | null>(null);
-  useEffect(() => {
-    setHasLockedMAndS(seedModel.hasLockedMnemonicAndSeed);
-  }, [seedModel.currentUnlockedMnemonicAndSeed]);
 
   if (
-    !lockedMnemonicAndSeed ||
-    (lockedMnemonicAndSeed && lockedMnemonicAndSeed.loading)
+    !seedModel.hasLockedMnemonicAndSeed ||
+    (seedModel.hasLockedMnemonicAndSeed &&
+      seedModel.hasLockedMnemonicAndSeed.loading)
   ) {
     return null;
   }
@@ -56,7 +49,7 @@ export const LoginPage = observer(() => {
         <RestoreWalletForm goBack={() => setRestore(false)} />
       ) : (
         <>
-          {lockedMnemonicAndSeed.hasLockedMnemonic ? (
+          {seedModel.hasLockedMnemonicAndSeed.hasLockedMnemonic ? (
             <LoginForm />
           ) : (
             <CreateWalletForm />
@@ -73,7 +66,6 @@ export const LoginPage = observer(() => {
 
 const CreateWalletForm = observer(() => {
   const seedModel = WalletSeedModel.instance;
-  const { unlockedMnemonic } = seedModel.unlockedMnemonicAndSeed;
   const [_newMAndS, _setNewMAndS] = useState<MnemonicAndSeed | null>(null);
 
   useEffect(() => {

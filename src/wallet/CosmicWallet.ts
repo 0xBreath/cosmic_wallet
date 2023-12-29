@@ -15,6 +15,7 @@ import {
   getParsedTokenBalancesForKey,
   LocalStorageAddressInfo,
   ParsedTokenBalance,
+  PrivateKeyImport,
   WalletAccountData,
   WalletAccounts,
   WalletSelector,
@@ -46,6 +47,7 @@ import { SupportedTransactionVersions } from "@solana/wallet-adapter-base/src/tr
 import { Account, getAssociatedTokenAddressSync } from "@solana/spl-token";
 import { Adapter } from "@solana/wallet-adapter-base";
 import { Buffer } from "buffer";
+import { setIntervalAsync } from "set-interval-async/dynamic";
 
 export class CosmicWallet {
   /// Constructor
@@ -99,6 +101,7 @@ export class CosmicWallet {
   );
   /// Reactions
   protected _reactions: any[] = [];
+  protected _asyncPolls: any[] = [];
 
   constructor() {
     makeAutoObservable(this);
@@ -106,7 +109,7 @@ export class CosmicWallet {
     this.setWalletSelector = this.setWalletSelector.bind(this);
     this.setWalletCount = this.setWalletCount.bind(this);
     this.setWalletName = this.setWalletName.bind(this);
-    // this.createReactions = this.createReactions.bind(this);
+    this.createReactions = this.createReactions.bind(this);
     this.addAccount = this.addAccount.bind(this);
     this.setAccountName = this.setAccountName.bind(this);
     this.sendTransaction = this.sendTransaction.bind(this);
@@ -122,10 +125,17 @@ export class CosmicWallet {
     this.logTransactionResult = this.logTransactionResult.bind(this);
     this.formatExplorerAccountLink = this.formatExplorerAccountLink.bind(this);
 
-    this.create();
-    this.setWalletSelector(DEFAULT_WALLET_SELECTOR);
     this.createReactions();
-    this.fetchAllTokenAccounts();
+    this.setWalletSelector(DEFAULT_WALLET_SELECTOR);
+
+    // todo: async set interval
+    this._asyncPolls.push(
+      setIntervalAsync(async () => {
+        await this.fetchAllTokenAccounts();
+        await this.refreshSolanaBalance();
+        await this.refreshTokenBalances();
+      }, 1000 * 60),
+    );
   }
 
   /*
@@ -142,7 +152,11 @@ export class CosmicWallet {
   }
 
   get publicKey(): PublicKey | null {
-    if (!this.signer) return null;
+    if (!this.signer) {
+      console.log("get publicKey, signer is null");
+      return null;
+    }
+    console.log("get publicKey valid");
     return this.signer.publicKey();
   }
 
@@ -206,12 +220,17 @@ export class CosmicWallet {
         return { index: walletIndex, address, name };
       });
     };
+
+    this.refreshSolanaBalance();
+    this.refreshTokenBalances();
   }
 
   initSigner(): void {
+    if (!this.seedModel.currentUnlockedMnemonicAndSeed) return;
     const { seed, importsEncryptionKey, derivationPath } =
       this.seedModel.currentUnlockedMnemonicAndSeed;
     if (!seed) return;
+
     if (this.walletSelector.walletIndex !== undefined) {
       const account = this.seedModel.seedToKeypair(
         seed,
@@ -221,6 +240,10 @@ export class CosmicWallet {
       console.debug("Init CosmicWallet signer from seed");
       this.signer = keypairToAsyncSigner(account);
     } else if (this.walletSelector.importedPubkey && importsEncryptionKey) {
+      console.log(
+        "initSigner: ",
+        this.walletSelector.importedPubkey.toString(),
+      );
       const { nonce, ciphertext } =
         this.seedModel.privateKeyImports[
           this.walletSelector.importedPubkey.toString()
@@ -285,7 +308,13 @@ export class CosmicWallet {
     }
     if (JSON.stringify(this._walletSelector) !== JSON.stringify(value)) {
       this._walletSelector = value;
+      if (value.importedPubkey) {
+        console.log("set imported wallet: ", value.importedPubkey?.toString());
+      } else {
+        console.log("set derived wallet: ", value.account.publicKey.toString());
+      }
     }
+    this.initSigner();
   }
 
   get walletCount(): number {
@@ -368,11 +397,11 @@ export class CosmicWallet {
 
   // todo: this isn't auto running...
   createReactions(): void {
-    this._reactions.push(
-      autorun(() => {
-        this.create();
-      }),
-    );
+    // this._reactions.push(
+    //   autorun(() => {
+    //     this.create();
+    //   }),
+    // );
     this._reactions.push(
       autorun(() => {
         this.refreshWalletAccounts();
@@ -458,16 +487,23 @@ export class CosmicWallet {
       this.setWalletName(oldWalletCount, name);
       this.setWalletCount(oldWalletCount + 1);
     } else {
+      console.log("addAccount imported");
       const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
       const plaintext = importedAccount.secretKey;
       const ciphertext = nacl.secretbox(plaintext, nonce, importsEncryptionKey);
 
-      let newPrivateKeyImports = { ...this.seedModel.privateKeyImports };
+      let newPrivateKeyImports: Record<string, PrivateKeyImport> = {
+        ...this.seedModel.privateKeyImports,
+      };
       newPrivateKeyImports[importedAccount.publicKey.toString()] = {
         name,
         ciphertext: bs58.encode(ciphertext),
         nonce: bs58.encode(nonce),
       };
+      console.log(
+        "update private key imports",
+        importedAccount.publicKey.toString(),
+      );
       this.seedModel.setPrivateKeyImports(newPrivateKeyImports);
     }
     this.refreshWalletAccounts();
@@ -496,20 +532,31 @@ export class CosmicWallet {
    *
    */
 
-  get tokenBalances(): Map<string, ParsedTokenBalance> {
-    return this._tokenBalances;
-  }
-
-  get solanaBalance(): number {
-    return this._solanaBalanceInLamports / LAMPORTS_PER_SOL;
-  }
-
   async fetchAllTokenAccounts(): Promise<void> {
     if (!this.publicKey) return;
     this._tokenAccounts = await getParsedTokenAccountsByOwner(
       this.connection,
       this.publicKey,
     );
+  }
+
+  get solanaBalance(): number {
+    return this._solanaBalanceInLamports / LAMPORTS_PER_SOL;
+  }
+
+  async refreshSolanaBalance(): Promise<void> {
+    if (!this.publicKey) return;
+
+    const balance = await this.connectionModel.connection.getBalance(
+      this.publicKey,
+    );
+    console.log("balance", balance);
+
+    this._solanaBalanceInLamports = balance;
+  }
+
+  get tokenBalances(): Map<string, ParsedTokenBalance> {
+    return this._tokenBalances;
   }
 
   async refreshTokenBalances(): Promise<void> {
@@ -520,23 +567,13 @@ export class CosmicWallet {
       this.publicKey,
     );
 
-    this.tokenBalances.clear();
+    this._tokenBalances.clear();
 
     runInAction(() => {
       for (const balance of balances) {
-        this.tokenBalances.set(balance.mint, balance);
+        this._tokenBalances.set(balance.mint, balance);
       }
     });
-  }
-
-  async refreshSolanaBalance(): Promise<void> {
-    if (!this.publicKey) return;
-
-    const balance = await this.connectionModel.connection.getBalance(
-      this.publicKey,
-    );
-
-    this._solanaBalanceInLamports = balance;
   }
 
   async refreshBalanceForMint(mint: string): Promise<void> {
