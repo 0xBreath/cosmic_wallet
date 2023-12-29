@@ -26,3 +26,8 @@ export type InstructionInfo = {
   rawData?: any;
   programId?: PublicKey;
 };
+
+export type TokenTransferInfo = {
+  mintOrSol: string | "sol";
+  accountBalance: number;
+};

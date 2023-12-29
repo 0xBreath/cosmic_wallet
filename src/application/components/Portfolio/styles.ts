@@ -12,6 +12,7 @@ export const Table = styled("table")(({ theme }) => ({
   [theme.breakpoints.up(theme.breakpoints.values.ext)]: {
     width: "70%",
     borderRadius: "20px",
+    background: customTheme.dark2,
   },
   [theme.breakpoints.down(theme.breakpoints.values.ext)]: {
     width: "100%",

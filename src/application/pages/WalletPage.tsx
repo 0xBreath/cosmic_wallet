@@ -1,6 +1,5 @@
 import React from "react";
 import { Grid, styled } from "@mui/material";
-// import { useIsExtensionWidth } from "../hooks";
 import { customTheme, EXTENSION_WIDTH, theme } from "../../shared";
 import { Portfolio } from "../components";
 
@@ -22,6 +21,9 @@ const StyledGrid: typeof Grid = styled(Grid)(({ theme: Theme }) => ({
     marginBottom: 24,
   },
   width: "100%",
+  display: "flex",
+  justifyContent: "center",
+  alignItems: "center",
 }));
 
 export function WalletPage() {

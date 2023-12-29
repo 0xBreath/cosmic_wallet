@@ -51,10 +51,6 @@ export const AddAccountDialog = observer((props: AddAccountDialogProps) => {
         setIsImport(false);
         setPrivateKey("");
       }}
-      // onSubmit={() => {
-      //   console.log("onSubmit auto");
-      //   onAdd({ name, importedAccount });
-      // }}
       PaperProps={{
         style: {
           background: customTheme.dark,

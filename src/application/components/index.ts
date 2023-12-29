@@ -20,3 +20,4 @@ export * from "./StyledButton";
 export * from "./NetworkSelectionMenu";
 export * from "./Portfolio";
 export * from "./ExpandViewButton";
+export * from "./TransferTokens";
