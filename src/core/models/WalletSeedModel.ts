@@ -65,7 +65,6 @@ export class WalletSeedModel {
     this.createReactions = this.createReactions.bind(this);
 
     this.createReactions();
-    this.setPrivateKeyImports({} as Record<string, PrivateKeyImport>);
   }
 
   /// Just return unlocked mnemonic and seed
@@ -132,11 +131,17 @@ export class WalletSeedModel {
   }
 
   setPrivateKeyImports(value: Record<string, PrivateKeyImport> | null): void {
-    if (value === null) {
+    console.log("setPrivateKeyImports value");
+    const cachedValue = localStorage.getItem(
+      WalletSeedModel.PRIVATE_KEY_IMPORTS_KEY,
+    );
+    if (value === null && cachedValue === null) {
+      console.log("reset setPrivateKeyImports");
       localStorage.removeItem(WalletSeedModel.PRIVATE_KEY_IMPORTS_KEY);
       return;
     }
     const serValue = JSON.stringify(value);
+    console.log("update setPrivateKeyImports", serValue);
     localStorage.setItem(WalletSeedModel.PRIVATE_KEY_IMPORTS_KEY, serValue);
     if (JSON.stringify(this._privateKeyImports) !== serValue) {
       this._privateKeyImports = value;

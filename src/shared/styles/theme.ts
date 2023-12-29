@@ -140,5 +140,19 @@ export const theme: Theme = createTheme({
         },
       },
     },
+    MuiDialogContentText: {
+      styleOverrides: {
+        root: {
+          backgroundColor: customTheme.dark,
+        },
+      },
+    },
+    MuiCard: {
+      styleOverrides: {
+        root: {
+          backgroundColor: customTheme.dark,
+        },
+      },
+    },
   },
 });

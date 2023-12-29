@@ -25,6 +25,7 @@ import {
 import { Keypair } from "@solana/web3.js";
 import {
   copyToClipboard,
+  customTheme,
   LockedMnemonicAndSeed,
   MnemonicAndSeed,
 } from "../../shared";
@@ -222,12 +223,17 @@ const SeedWordsForm = observer(
           onSubmit={goForward}
           fullWidth
         >
-          <DialogTitle>{"Confirm Mnemonic"}</DialogTitle>
-          <DialogContentText style={{ margin: 20 }}>
+          <DialogTitle>
+            <Typography variant="h3">Confirm Mnemonic</Typography>
+          </DialogTitle>
+          <DialogContentText
+            style={{ margin: 20, backgroundColor: customTheme.dark }}
+          >
             <div
               style={{
                 display: "flex",
                 flexDirection: "column",
+                background: customTheme.dark,
               }}
             >
               Please re-enter your seed phrase to confirm that you have saved

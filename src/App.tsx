@@ -3,14 +3,16 @@ import { CssBaseline, ThemeProvider } from "@mui/material";
 
 import {
   ConnectedWalletsProvider,
-  ConnectionsPage, ExtensionNavigation,
+  ConnectionsPage,
+  ExtensionNavigation,
   LoadingIndicator,
   LoginPage,
   NavigationFrame,
   Page,
   PageProvider,
   PopupPage,
-  TokenRegistryProvider, useIsExtensionWidth,
+  TokenRegistryProvider,
+  useIsExtensionWidth,
   usePage,
   WalletPage,
 } from "./application";
@@ -41,10 +43,12 @@ export const App = observer(() => {
   );
 
   const env = isExtension ? (
-      <ConnectedWalletsProvider>
-        <PageProvider>{appElement}</PageProvider>
-      </ConnectedWalletsProvider>
-    ) : appElement;
+    <ConnectedWalletsProvider>
+      <PageProvider>{appElement}</PageProvider>
+    </ConnectedWalletsProvider>
+  ) : (
+    appElement
+  );
 
   return (
     <Suspense fallback={<LoadingIndicator />}>
@@ -66,14 +70,16 @@ export const App = observer(() => {
 /// Then log into the wallet.
 /// Then enter the app.
 const PageContents = observer(() => {
-  const publicKey = CosmicWallet.instance.publicKey;
   const { page } = usePage();
-  if (!publicKey) {
+
+  if (!CosmicWallet.instance.publicKey) {
     return <LoginPage />;
   }
+
   if (window.opener) {
     return <PopupPage opener={window.opener} />;
   }
+
   switch (page) {
     case Page.Wallet:
       return <WalletPage />;

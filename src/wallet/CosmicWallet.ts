@@ -31,6 +31,7 @@ import {
   computed,
   makeAutoObservable,
   observable,
+  reaction,
   runInAction,
 } from "mobx";
 import {
@@ -153,10 +154,8 @@ export class CosmicWallet {
 
   get publicKey(): PublicKey | null {
     if (!this.signer) {
-      console.log("get publicKey, signer is null");
       return null;
     }
-    console.log("get publicKey valid");
     return this.signer.publicKey();
   }
 
@@ -239,6 +238,7 @@ export class CosmicWallet {
       );
       console.debug("Init CosmicWallet signer from seed");
       this.signer = keypairToAsyncSigner(account);
+      this.refreshEverything();
     } else if (this.walletSelector.importedPubkey && importsEncryptionKey) {
       console.log(
         "initSigner: ",
@@ -256,6 +256,7 @@ export class CosmicWallet {
       if (secret) {
         console.debug("Init CosmicWallet signer from imported secret");
         this.signer = keypairToAsyncSigner(Keypair.fromSecretKey(secret));
+        this.refreshEverything();
       } else {
         console.error("Failed to find imported wallet secret");
         return;
@@ -308,11 +309,6 @@ export class CosmicWallet {
     }
     if (JSON.stringify(this._walletSelector) !== JSON.stringify(value)) {
       this._walletSelector = value;
-      if (value.importedPubkey) {
-        console.log("set imported wallet: ", value.importedPubkey?.toString());
-      } else {
-        console.log("set derived wallet: ", value.account.publicKey.toString());
-      }
     }
     this.initSigner();
   }
@@ -395,17 +391,19 @@ export class CosmicWallet {
     );
   }
 
-  // todo: this isn't auto running...
   createReactions(): void {
-    // this._reactions.push(
-    //   autorun(() => {
-    //     this.create();
-    //   }),
-    // );
     this._reactions.push(
       autorun(() => {
         this.refreshWalletAccounts();
       }),
+    );
+    this._reactions.push(
+      reaction(
+        () => this.seedModel.unlockedMnemonicAndSeed,
+        () => {
+          this.create();
+        },
+      ),
     );
   }
 
@@ -487,7 +485,6 @@ export class CosmicWallet {
       this.setWalletName(oldWalletCount, name);
       this.setWalletCount(oldWalletCount + 1);
     } else {
-      console.log("addAccount imported");
       const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
       const plaintext = importedAccount.secretKey;
       const ciphertext = nacl.secretbox(plaintext, nonce, importsEncryptionKey);
@@ -500,13 +497,11 @@ export class CosmicWallet {
         ciphertext: bs58.encode(ciphertext),
         nonce: bs58.encode(nonce),
       };
-      console.log(
-        "update private key imports",
-        importedAccount.publicKey.toString(),
-      );
       this.seedModel.setPrivateKeyImports(newPrivateKeyImports);
     }
     this.refreshWalletAccounts();
+    this.refreshSolanaBalance();
+    this.refreshTokenBalances();
   }
 
   setAccountName(selector: WalletSelector, newName: string): void {
@@ -532,6 +527,7 @@ export class CosmicWallet {
    *
    */
 
+  // todo: deprecate this
   async fetchAllTokenAccounts(): Promise<void> {
     if (!this.publicKey) return;
     this._tokenAccounts = await getParsedTokenAccountsByOwner(
@@ -544,13 +540,19 @@ export class CosmicWallet {
     return this._solanaBalanceInLamports / LAMPORTS_PER_SOL;
   }
 
+  async refreshEverything(): Promise<void> {
+    await this.refreshSolanaBalance();
+    await this.refreshTokenBalances();
+    await this.refreshWalletAccounts();
+    await this.fetchAllTokenAccounts();
+  }
+
   async refreshSolanaBalance(): Promise<void> {
     if (!this.publicKey) return;
 
     const balance = await this.connectionModel.connection.getBalance(
       this.publicKey,
     );
-    console.log("balance", balance);
 
     this._solanaBalanceInLamports = balance;
   }
@@ -567,9 +569,8 @@ export class CosmicWallet {
       this.publicKey,
     );
 
-    this._tokenBalances.clear();
-
     runInAction(() => {
+      console.log("refreshing token balances...");
       for (const balance of balances) {
         this._tokenBalances.set(balance.mint, balance);
       }
