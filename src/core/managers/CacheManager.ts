@@ -2,12 +2,12 @@ import assert from "assert";
 import { CacheKeyProps, CacheListener } from "../../shared";
 import { action, makeAutoObservable, observable } from "mobx";
 import { AccountInfo, Connection, PublicKey } from "@solana/web3.js";
-import { ConnectionModel } from "./ConnectionModel";
+import { ConnectionManager } from ".";
 import { useAsyncData, useRefEqual } from "../../application";
 import { useEffect } from "react";
 
 /// GlobalLoops
-export class CacheModel {
+export class CacheManager {
   PageLoadTime = new Date();
   /// Contains result of all functions
   GlobalCache: Map<string, any> = new Map();
@@ -42,10 +42,10 @@ export class CacheModel {
     this.setInitialAccountInfo = this.setInitialAccountInfo.bind(this);
   }
 
-  private static _instance: CacheModel;
-  static get instance(): CacheModel {
+  private static _instance: CacheManager;
+  static get instance(): CacheManager {
     if (!this._instance) {
-      this._instance = new CacheModel();
+      this._instance = new CacheManager();
     }
     return this._instance;
   }
@@ -112,7 +112,7 @@ export class CacheModel {
   public accountInfo(
     publicKey?: PublicKey,
   ): [AccountInfo<Buffer> | null | undefined, boolean] {
-    const connection = ConnectionModel.instance.connection;
+    const connection = ConnectionManager.instance.connection;
 
     const cacheKeyProps: CacheKeyProps = {
       rpcEndpoint: connection.rpcEndpoint,
@@ -207,7 +207,7 @@ class FetchLoopInternal<T = any> {
   listeners: Set<CacheListener<T>>;
   errors: number;
 
-  protected cacheModel = CacheModel.instance;
+  protected cacheModel = CacheManager.instance;
 
   constructor(cacheKey: any, fn: () => Promise<T>) {
     this.cacheKey = cacheKey;

@@ -1,7 +1,7 @@
 import React from "react";
 import { useEffect, useState } from "react";
 
-import { WalletSeedModel } from "../../core";
+import { WalletSeedManager } from "../../core";
 import { DialogForm, LoadingIndicator } from "..";
 import { validateMnemonic } from "bip39";
 import {
@@ -32,7 +32,7 @@ import {
 import { observer } from "mobx-react";
 
 export const LoginPage = observer(() => {
-  const seedModel = WalletSeedModel.instance;
+  const seedModel = WalletSeedManager.instance;
 
   const [restore, setRestore] = useState(false);
 
@@ -66,7 +66,7 @@ export const LoginPage = observer(() => {
 });
 
 const CreateWalletForm = observer(() => {
-  const seedModel = WalletSeedModel.instance;
+  const seedModel = WalletSeedManager.instance;
   const [_newMAndS, _setNewMAndS] = useState<MnemonicAndSeed | null>(null);
 
   useEffect(() => {
@@ -86,7 +86,7 @@ const CreateWalletForm = observer(() => {
       mnemonic,
       seed,
       password,
-      WalletSeedModel.DERIVATION_PATHS.bip44Change,
+      WalletSeedManager.DERIVATION_PATHS.bip44Change,
     );
   }
 
@@ -118,7 +118,7 @@ const SeedWordsForm = observer(
       return null;
     }
 
-    const seedModel = WalletSeedModel.instance;
+    const seedModel = WalletSeedManager.instance;
     const [confirmed, setConfirmed] = useState(false);
     const [downloaded, setDownloaded] = useState(false);
     const [showDialog, setShowDialog] = useState(false);
@@ -326,7 +326,7 @@ function ChoosePasswordForm({
 }
 
 const LoginForm = observer(() => {
-  const seedModel = WalletSeedModel.instance;
+  const seedModel = WalletSeedManager.instance;
   const [password, setPassword] = useState("");
   const [stayLoggedIn, setStayLoggedIn] = useState(false);
 
@@ -377,7 +377,7 @@ const LoginForm = observer(() => {
 });
 
 const RestoreWalletForm = observer(({ goBack }: { goBack: () => void }) => {
-  const seedModel = WalletSeedModel.instance;
+  const seedModel = WalletSeedManager.instance;
   const [rawMnemonic, setRawMnemonic] = useState("");
   const [seed, setSeed] = useState("");
   const [password, setPassword] = useState("");
@@ -483,7 +483,7 @@ const DerivedAccounts = observer(
     seed: string;
     password: string;
   }) => {
-    const seedModel = WalletSeedModel.instance;
+    const seedModel = WalletSeedManager.instance;
     const [dPathMenuItem, setDPathMenuItem] = useState(
       DerivationPathMenuItem.Bip44Change,
     );
@@ -596,13 +596,13 @@ export const DerivationPathMenuItem = {
 export function toDerivationPath(dPathMenuItem: number): string | undefined {
   switch (dPathMenuItem) {
     case DerivationPathMenuItem.Deprecated:
-      return WalletSeedModel.DERIVATION_PATHS.deprecated;
+      return WalletSeedManager.DERIVATION_PATHS.deprecated;
     case DerivationPathMenuItem.Bip44:
-      return WalletSeedModel.DERIVATION_PATHS.bip44;
+      return WalletSeedManager.DERIVATION_PATHS.bip44;
     case DerivationPathMenuItem.Bip44Change:
-      return WalletSeedModel.DERIVATION_PATHS.bip44Change;
+      return WalletSeedManager.DERIVATION_PATHS.bip44Change;
     case DerivationPathMenuItem.Bip44Root:
-      return WalletSeedModel.DERIVATION_PATHS.bip44Root;
+      return WalletSeedManager.DERIVATION_PATHS.bip44Root;
     default:
       throw new Error(`invalid derivation path: ${dPathMenuItem}`);
   }

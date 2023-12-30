@@ -44,7 +44,9 @@ export default function TokenInstruction({
   onOpenAddress: (address: PublicKey) => void;
 }) {
   const wallet = CosmicWallet.instance;
-  const publicKeys = wallet.tokenAccounts.map((t) => t.address);
+  const publicKeys = [...wallet.tokenBalances.values()].map(
+    (t) => new PublicKey(t.tokenAccount),
+  );
   const { type, data } = instruction;
 
   const getAddressValue = (address: PublicKey) => {

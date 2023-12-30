@@ -12,7 +12,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Keypair } from "@solana/web3.js";
-import { WalletSeedModel } from "../../core";
+import { WalletSeedManager } from "../../core";
 import { observer } from "mobx-react";
 import { customTheme } from "../../shared";
 import { CosmicWallet } from "../../wallet";
@@ -29,7 +29,7 @@ export type AddAccountDialogProps = {
 };
 
 export const AddAccountDialog = observer((props: AddAccountDialogProps) => {
-  const seedModel = WalletSeedModel.instance;
+  const seedModel = WalletSeedManager.instance;
   const { open, onAdd, onClose } = props;
 
   const [name, setName] = useState("");

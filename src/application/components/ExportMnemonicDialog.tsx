@@ -1,5 +1,5 @@
-import React  from "react";
-import { useState } from 'react';
+import React from "react";
+import { useState } from "react";
 import {
   Button,
   DialogActions,
@@ -11,7 +11,7 @@ import {
 } from "@mui/material";
 import { DialogForm } from ".";
 import { CosmicWallet } from "../../wallet";
-import { WalletSeedModel } from "../../core";
+import { WalletSeedManager } from "../../core";
 
 export function ExportMnemonicDialog({
   open,
@@ -22,7 +22,7 @@ export function ExportMnemonicDialog({
 }) {
   const [isHidden, setIsHidden] = useState(true);
   const cosmicWallet = CosmicWallet.instance;
-  const seedModel = WalletSeedModel.instance;
+  const seedModel = WalletSeedManager.instance;
   const mnemKey = seedModel.unlockedMnemonicAndSeed.unlockedMnemonic;
   return (
     <DialogForm open={open} onClose={onClose} fullWidth>

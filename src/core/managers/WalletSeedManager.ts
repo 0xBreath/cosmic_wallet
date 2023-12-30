@@ -15,11 +15,11 @@ import { derivePath } from "ed25519-hd-key";
 // [HDKey](https://github.com/paulmillr/scure-bip32/blob/main/test/hdkey.test.ts#L162)
 import { HDKey } from "@scure/bip32";
 
-export class WalletSeedModel {
-  private static _instance: WalletSeedModel;
-  static get instance(): WalletSeedModel {
+export class WalletSeedManager {
+  private static _instance: WalletSeedManager;
+  static get instance(): WalletSeedManager {
     if (!this._instance) {
-      this._instance = new WalletSeedModel();
+      this._instance = new WalletSeedManager();
     }
     return this._instance;
   }
@@ -82,7 +82,7 @@ export class WalletSeedModel {
         "null",
     );
     if (stored === null) {
-      return WalletSeedModel.EMPTY_MNEMONIC;
+      return WalletSeedManager.EMPTY_MNEMONIC;
     }
     return {
       importsEncryptionKey: this.deriveImportsEncryptionKey(stored.seed),
@@ -98,7 +98,7 @@ export class WalletSeedModel {
           unlockedMnemonic: this.currentUnlockedMnemonicAndSeed,
           loading: false,
         }
-      : { unlockedMnemonic: WalletSeedModel.EMPTY_MNEMONIC, loading: true };
+      : { unlockedMnemonic: WalletSeedManager.EMPTY_MNEMONIC, loading: true };
   }
 
   /// Alias for [`useHasLockedMnemonicAndSeed`]
@@ -114,12 +114,12 @@ export class WalletSeedModel {
 
   get privateKeyImports(): Record<string, PrivateKeyImport> {
     const value: string | null = localStorage.getItem(
-      WalletSeedModel.PRIVATE_KEY_IMPORTS_KEY,
+      WalletSeedManager.PRIVATE_KEY_IMPORTS_KEY,
     );
     if (!value) {
       const parsedValue = {} as Record<string, PrivateKeyImport>;
       localStorage.setItem(
-        WalletSeedModel.PRIVATE_KEY_IMPORTS_KEY,
+        WalletSeedManager.PRIVATE_KEY_IMPORTS_KEY,
         JSON.stringify(parsedValue),
       );
       this._privateKeyImports = parsedValue;
@@ -138,16 +138,16 @@ export class WalletSeedModel {
   setPrivateKeyImports(value: Record<string, PrivateKeyImport> | null): void {
     console.log("setPrivateKeyImports value");
     const cachedValue = localStorage.getItem(
-      WalletSeedModel.PRIVATE_KEY_IMPORTS_KEY,
+      WalletSeedManager.PRIVATE_KEY_IMPORTS_KEY,
     );
     if (value === null && cachedValue === null) {
       console.log("reset setPrivateKeyImports");
-      localStorage.removeItem(WalletSeedModel.PRIVATE_KEY_IMPORTS_KEY);
+      localStorage.removeItem(WalletSeedManager.PRIVATE_KEY_IMPORTS_KEY);
       return;
     }
     const serValue = JSON.stringify(value);
     console.log("update setPrivateKeyImports", serValue);
-    localStorage.setItem(WalletSeedModel.PRIVATE_KEY_IMPORTS_KEY, serValue);
+    localStorage.setItem(WalletSeedManager.PRIVATE_KEY_IMPORTS_KEY, serValue);
     if (JSON.stringify(this._privateKeyImports) !== serValue) {
       this._privateKeyImports = value;
     }
@@ -356,7 +356,7 @@ export class WalletSeedModel {
       seed: undefined,
       importsEncryptionKey: undefined,
     });
-    this.walletSeedChanged.emit("change", WalletSeedModel.EMPTY_MNEMONIC);
+    this.walletSeedChanged.emit("change", WalletSeedManager.EMPTY_MNEMONIC);
     if (isExtension) {
       // Must use wrapper function for window.location.reload
       chrome.storage.local.clear(() => window.location.reload());
@@ -433,17 +433,17 @@ export class WalletSeedModel {
     derivationPath?: string,
   ): any {
     switch (derivationPath) {
-      case WalletSeedModel.DERIVATION_PATHS.deprecated:
+      case WalletSeedManager.DERIVATION_PATHS.deprecated:
         const path = `m/501'/${walletIndex}'/0/${accountIndex}`;
         // return bip32.fromSeed(Buffer.from(seed, "hex")).derivePath(path)
         //   .privateKey;
         const key = HDKey.fromMasterSeed(Buffer.from(seed, "hex"));
         const derivedKey = key.derive(path);
         return derivedKey.privateKey as Buffer;
-      case WalletSeedModel.DERIVATION_PATHS.bip44:
+      case WalletSeedManager.DERIVATION_PATHS.bip44:
         const path44 = `m/44'/501'/${walletIndex}'`;
         return derivePath(path44, seed as string).key;
-      case WalletSeedModel.DERIVATION_PATHS.bip44Change:
+      case WalletSeedManager.DERIVATION_PATHS.bip44Change:
         const path44Change = `m/44'/501'/${walletIndex}'/0'`;
         return derivePath(path44Change, seed as string).key;
       default:

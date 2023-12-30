@@ -15,12 +15,12 @@ export type ClusterConfig = {
 
 export type ClusterSlug = "mainnet-beta" | "localnet" | "custom";
 
-type ConnectionModelData = {
+type ConnectionManagerData = {
   connection: Connection;
   cluster: ClusterConfig;
 };
 
-export class ConnectionModel {
+export class ConnectionManager {
   constructor() {
     makeAutoObservable(this);
 
@@ -42,13 +42,13 @@ export class ConnectionModel {
     this.data = makeAutoObservable(this.getConnection(defaultCluster));
   }
 
-  protected data: ConnectionModelData;
+  protected data: ConnectionManagerData;
   /** This is only set to keep track of it in tests, the connection object doesn't give it to us lmao */
   protected wsEndpoint: string | undefined = undefined;
-  private static _instance: ConnectionModel;
-  static get instance(): ConnectionModel {
+  private static _instance: ConnectionManager;
+  static get instance(): ConnectionManager {
     if (!this._instance) {
-      this._instance = new ConnectionModel();
+      this._instance = new ConnectionManager();
     }
     return this._instance;
   }
@@ -124,7 +124,7 @@ export class ConnectionModel {
     this._clusters[customClusterConfig.slug] = customClusterConfig;
   }
 
-  protected getConnection(slug: ClusterSlug): ConnectionModelData {
+  protected getConnection(slug: ClusterSlug): ConnectionManagerData {
     const cluster: ClusterConfig = this._clusters[slug];
     const connection = new Connection(cluster.httpEndPoint, {
       wsEndpoint: cluster.wsEndPoint,
@@ -189,10 +189,13 @@ export class ConnectionModel {
       return;
     }
 
-    console.debug("Message link: ", this.formatMessageLink(transaction));
+    console.debug(
+      "Pre-transaction simulation: ",
+      this.formatMessageLink(transaction),
+    );
 
     console.debug(
-      `Transaction link: ${this.formatTransactionLink(
+      `Transaction: ${this.formatTransactionLink(
         bs58.encode(transaction.signature),
       )}`,
     );

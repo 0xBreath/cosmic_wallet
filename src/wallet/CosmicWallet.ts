@@ -1,6 +1,6 @@
 import bs58 from "bs58";
-import base58 from "bs58";
 import {
+  AccountInfo,
   Connection,
   Keypair,
   LAMPORTS_PER_SOL,
@@ -22,10 +22,11 @@ import {
   RefreshState,
 } from "../shared";
 import {
-  ConnectionModel,
+  ConnectionManager,
   PlayerProfileService,
+  TransactionManager,
   WalletAdapterService,
-  WalletSeedModel,
+  WalletSeedManager,
 } from "../core";
 import {
   autorun,
@@ -39,7 +40,6 @@ import {
   AsyncSigner,
   buildAndSignTransaction,
   buildDynamicTransactions,
-  formatExplorerLink,
   getParsedTokenAccountsByOwner,
   InstructionReturn,
   keypairToAsyncSigner,
@@ -52,6 +52,9 @@ import {
   Account,
   createTransferCheckedInstruction,
   getAssociatedTokenAddressSync,
+  Mint,
+  RawMint,
+  unpackMint,
 } from "@solana/spl-token";
 import { Adapter } from "@solana/wallet-adapter-base";
 import { Buffer } from "buffer";
@@ -72,9 +75,10 @@ export class CosmicWallet {
   private static WALLET_COUNT_KEY = "walletCount";
   private static WALLET_NAMES_KEY = "walletNames";
 
-  /// Models
-  protected connectionModel = ConnectionModel.instance;
-  protected seedModel = WalletSeedModel.instance;
+  /// Managers
+  protected connectionManager = ConnectionManager.instance;
+  protected seedManager = WalletSeedManager.instance;
+  protected transactionManager = TransactionManager.instance;
 
   /// Services
   protected walletAdapterService = WalletAdapterService.instance;
@@ -115,32 +119,35 @@ export class CosmicWallet {
   constructor() {
     makeAutoObservable(this);
 
+    // Manage seed, private key, and wallet accounts
     this.setWalletSelector = this.setWalletSelector.bind(this);
     this.setWalletCount = this.setWalletCount.bind(this);
     this.setWalletName = this.setWalletName.bind(this);
     this.createReactions = this.createReactions.bind(this);
     this.addAccount = this.addAccount.bind(this);
     this.setAccountName = this.setAccountName.bind(this);
-    this.sendTransaction = this.sendTransaction.bind(this);
-    this.sendDynamicTransaction = this.sendDynamicTransaction.bind(this);
-    this.refreshSolanaBalance = this.refreshSolanaBalance.bind(this);
-    this.refreshTokenBalances = this.refreshTokenBalances.bind(this);
-    this.refreshBalanceForMint = this.refreshBalanceForMint.bind(this);
     this.create = this.create.bind(this);
     this.connect = this.connect.bind(this);
     this.initSigner = this.initSigner.bind(this);
+
+    // Fetch and cache token balances
+    this.refreshEverything = this.refreshEverything.bind(this);
     this.refreshWalletAccounts = this.refreshWalletAccounts.bind(this);
-    this.fetchAllTokenAccounts = this.fetchAllTokenAccounts.bind(this);
+    this.refreshSolanaBalance = this.refreshSolanaBalance.bind(this);
+    this.refreshTokenBalances = this.refreshTokenBalances.bind(this);
+    this.refreshBalanceForMint = this.refreshBalanceForMint.bind(this);
+
+    // Transaction handlers
+    this.nativeTransfer = this.nativeTransfer.bind(this);
+    this.tokenTransfer = this.tokenTransfer.bind(this);
 
     this.createReactions();
     this.setWalletSelector(DEFAULT_WALLET_SELECTOR);
 
-    // todo: async set interval
+    // TODO: Convert to RPC program/account subscriptions instead of polling
     this._asyncPolls.push(
       setIntervalAsync(async () => {
-        await this.fetchAllTokenAccounts();
-        await this.refreshSolanaBalance();
-        await this.refreshTokenBalances();
+        await this.refreshEverything();
       }, 1000 * 60),
     );
   }
@@ -177,7 +184,7 @@ export class CosmicWallet {
   }
 
   get connection(): Connection {
-    return this.connectionModel.connection;
+    return this.connectionManager.connection;
   }
 
   get supportedWallets(): Adapter[] {
@@ -209,15 +216,15 @@ export class CosmicWallet {
 
   /// If it exists, it loads all addresses associated with the seed.
   async create(): Promise<void> {
-    if (!this.seedModel.currentUnlockedMnemonicAndSeed) return;
-    const { seed } = this.seedModel.currentUnlockedMnemonicAndSeed;
+    if (!this.seedManager.currentUnlockedMnemonicAndSeed) return;
+    const { seed } = this.seedManager.currentUnlockedMnemonicAndSeed;
     if (!seed) return;
 
     this.initSigner();
 
     this.listAddresses = (walletCount: number): LocalStorageAddressInfo[] => {
       return [...Array(walletCount).keys()].map((walletIndex) => {
-        const address = this.seedModel.seedToKeypair(
+        const address = this.seedManager.seedToKeypair(
           seed,
           walletIndex,
         ).publicKey;
@@ -228,13 +235,13 @@ export class CosmicWallet {
   }
 
   initSigner(): void {
-    if (!this.seedModel.currentUnlockedMnemonicAndSeed) return;
+    if (!this.seedManager.currentUnlockedMnemonicAndSeed) return;
     const { seed, importsEncryptionKey, derivationPath } =
-      this.seedModel.currentUnlockedMnemonicAndSeed;
+      this.seedManager.currentUnlockedMnemonicAndSeed;
     if (!seed) return;
 
     if (this.walletSelector.walletIndex !== undefined) {
-      const account = this.seedModel.seedToKeypair(
+      const account = this.seedManager.seedToKeypair(
         seed,
         this.walletSelector.walletIndex,
         derivationPath,
@@ -244,7 +251,7 @@ export class CosmicWallet {
       this.refreshEverything();
     } else if (this.walletSelector.importedPubkey && importsEncryptionKey) {
       const { nonce, ciphertext } =
-        this.seedModel.privateKeyImports[
+        this.seedManager.privateKeyImports[
           this.walletSelector.importedPubkey.toString()
         ];
       const secret: Uint8Array | null = nacl.secretbox.open(
@@ -398,7 +405,7 @@ export class CosmicWallet {
     );
     this._reactions.push(
       reaction(
-        () => this.seedModel.unlockedMnemonicAndSeed,
+        () => this.seedManager.unlockedMnemonicAndSeed,
         () => {
           this.create();
         },
@@ -407,9 +414,9 @@ export class CosmicWallet {
   }
 
   refreshWalletAccounts(): void {
-    if (!this.seedModel.currentUnlockedMnemonicAndSeed) return;
+    if (!this.seedManager.currentUnlockedMnemonicAndSeed) return;
     const { seed, derivationPath } =
-      this.seedModel.currentUnlockedMnemonicAndSeed;
+      this.seedManager.currentUnlockedMnemonicAndSeed;
     if (!seed) {
       console.warn("Missing or locked seed, walletCount", this.walletCount);
       this._walletAccounts = {
@@ -423,7 +430,7 @@ export class CosmicWallet {
     const derivedAccounts: WalletAccountData[] = [
       ...Array(this.walletCount).keys(),
     ].map((idx) => {
-      let address = this.seedModel.seedToKeypair(
+      let address = this.seedManager.seedToKeypair(
         seed,
         idx,
         derivationPath,
@@ -442,9 +449,9 @@ export class CosmicWallet {
     });
 
     const importedAccounts: WalletAccountData[] = Object.keys(
-      this.seedModel.privateKeyImports,
+      this.seedManager.privateKeyImports,
     ).map((pubkey) => {
-      const { name } = this.seedModel.privateKeyImports[pubkey];
+      const { name } = this.seedManager.privateKeyImports[pubkey];
       const selector: WalletSelector = {
         walletIndex: undefined,
         importedPubkey: new PublicKey(bs58.decode(pubkey)),
@@ -474,7 +481,7 @@ export class CosmicWallet {
     importedAccount?: Keypair;
   }): void {
     const { importsEncryptionKey } =
-      this.seedModel.currentUnlockedMnemonicAndSeed;
+      this.seedManager.currentUnlockedMnemonicAndSeed;
     if (!importsEncryptionKey) {
       console.error("No encryption key found in addAccount");
       return;
@@ -489,23 +496,23 @@ export class CosmicWallet {
       const ciphertext = nacl.secretbox(plaintext, nonce, importsEncryptionKey);
 
       let newPrivateKeyImports: Record<string, PrivateKeyImport> = {
-        ...this.seedModel.privateKeyImports,
+        ...this.seedManager.privateKeyImports,
       };
       newPrivateKeyImports[importedAccount.publicKey.toString()] = {
         name,
         ciphertext: bs58.encode(ciphertext),
         nonce: bs58.encode(nonce),
       };
-      this.seedModel.setPrivateKeyImports(newPrivateKeyImports);
+      this.seedManager.setPrivateKeyImports(newPrivateKeyImports);
     }
     this.refreshEverything();
   }
 
   setAccountName(selector: WalletSelector, newName: string): void {
     if (selector.importedPubkey) {
-      let newPrivateKeyImports = { ...this.seedModel.privateKeyImports };
+      let newPrivateKeyImports = { ...this.seedManager.privateKeyImports };
       newPrivateKeyImports[selector.importedPubkey.toString()].name = newName;
-      this.seedModel.setPrivateKeyImports(newPrivateKeyImports);
+      this.seedManager.setPrivateKeyImports(newPrivateKeyImports);
     } else if (selector.walletIndex) {
       this.setWalletName(selector.walletIndex, newName);
     }
@@ -520,7 +527,7 @@ export class CosmicWallet {
 
   /*
    *
-   * Fetch and cache token balances for wallet
+   * Fetch and cache token balances
    *
    */
 
@@ -528,16 +535,6 @@ export class CosmicWallet {
     await this.refreshSolanaBalance();
     await this.refreshTokenBalances();
     await this.refreshWalletAccounts();
-    await this.fetchAllTokenAccounts();
-  }
-
-  // todo: deprecate this
-  async fetchAllTokenAccounts(): Promise<void> {
-    if (!this.publicKey) return;
-    this._tokenAccounts = await getParsedTokenAccountsByOwner(
-      this.connection,
-      this.publicKey,
-    );
   }
 
   get solanaBalance(): number {
@@ -548,7 +545,7 @@ export class CosmicWallet {
 
   async refreshSolanaBalance(): Promise<void> {
     if (!this.publicKey) return;
-    const balance = await this.connectionModel.connection.getBalance(
+    const balance = await this.connectionManager.connection.getBalance(
       this.publicKey,
     );
     this._solanaBalanceInLamports = balance;
@@ -563,7 +560,7 @@ export class CosmicWallet {
 
     this.refreshTokenState = RefreshState.Pending;
     const balances = await getParsedTokenBalancesForKey(
-      this.connectionModel.connection,
+      this.connectionManager.connection,
       this.publicKey,
     );
 
@@ -586,7 +583,7 @@ export class CosmicWallet {
 
     try {
       const balance =
-        await this.connectionModel.connection.getTokenAccountBalance(
+        await this.connectionManager.connection.getTokenAccountBalance(
           tokenAccount,
         );
 
@@ -606,25 +603,20 @@ export class CosmicWallet {
 
   /*
    *
-   * Instruction builders
+   * Transaction builders
    *
    */
 
   async nativeTransfer(destination: PublicKey, amount: number): Promise<void> {
     if (!this.signer) return;
 
-    const ix: InstructionReturn = transfer(
+    await this.transactionManager.nativeTransfer(
       this.signer,
       destination,
-      amount * LAMPORTS_PER_SOL,
+      amount,
     );
-    const sigs = await this.sendTransaction(ix);
-    for (const sig in sigs) {
-      console.log(
-        "native transfer:",
-        this.connectionModel.formatTransactionLink(sig),
-      );
-    }
+    await this.refreshEverything();
+
     // todo: push to transaction history
     // todo: toast notification
   }
@@ -636,125 +628,15 @@ export class CosmicWallet {
   ): Promise<void> {
     if (!this.signer) return;
 
-    const fromAta = getAssociatedTokenAddressSync(mint, this.publicKey);
-
-    const toAta: { address; instructions } =
-      createAssociatedTokenAccountIdempotent(mint, destination);
-
-    const transferIxs: InstructionReturn = async (funder) => ({
-      instruction: createTransferCheckedInstruction(
-        fromAta, // from (should be a token account)
-        mint, // mint
-        toAta.address, // to (should be a token account)
-        this.publicKey, // from's owner
-        amount, // amount, if your decimals is 8, send 10^8 for 1 token
-        8, // todo: find a way to get this, for now assume 8
-      ),
-      signers: [this.signer],
-    });
-
-    const ixs = [toAta.instructions, transferIxs];
-    const sigs = await this.sendTransaction(ixs);
-    for (const sig in sigs) {
-      console.log(
-        "token transfer:",
-        this.connectionModel.formatTransactionLink(sig),
-      );
-    }
-  }
-
-  /*
-   *
-   * Manage building, signing, and sending transactions
-   *
-   */
-
-  async sendTransaction(
-    instructions: InstructionReturn | InstructionReturn[],
-  ): Promise<TransactionSignature[] | null> {
-    if (!this.signer) return null;
-
-    const transaction = await buildAndSignTransaction(
-      instructions,
+    await this.transactionManager.tokenTransfer(
       this.signer,
-      {
-        connection: this.connectionModel.connection,
-      },
+      mint,
+      destination,
+      amount,
     );
-
-    this.connectionModel.logTransactionResult(transaction.transaction);
-
-    const result = await sendTransaction(
-      transaction,
-      this.connectionModel.connection,
-      {
-        sendOptions: { skipPreflight: this.data.skipPreflightConfig ?? true },
-      },
-    );
-
-    const sigOrErr = result.value;
-
-    if (sigOrErr.isErr()) {
-      console.error("Transaction error", JSON.stringify(sigOrErr, null, 2));
-      return null;
-    }
-
     await this.refreshEverything();
 
-    return [sigOrErr.value];
-  }
-
-  /**
-   * This method should be used to sign + send an arbitrary amount of instructions with one button click.
-   * Packs as many instructions into each transaction as possible, so use this for efficiency.
-   * This does not provide functionality to define which instructions go into which transactions.
-   * To send each instruction individually, see `sendInstructionsSeparately`.
-   */
-  async sendDynamicTransaction(
-    instructions: InstructionReturn[],
-  ): Promise<TransactionSignature[] | null> {
-    if (!this.signer || !this.playerProfileService.anchorProgram) return null;
-
-    try {
-      const result = await buildDynamicTransactions(instructions, this.signer, {
-        connection: this.connectionModel.connection,
-      });
-
-      if (!result.isOk()) {
-        console.error("Transaction error", JSON.stringify(result, null, 2));
-        return null;
-      }
-
-      for (const transaction of result.value) {
-        this.connectionModel.logTransactionResult(transaction.transaction);
-
-        try {
-          const response = await sendTransaction(
-            transaction,
-            this.connectionModel.connection,
-            {
-              sendOptions: {
-                skipPreflight: this.data.skipPreflightConfig ?? true,
-              },
-            },
-          );
-
-          console.debug("Transaction result:", response);
-        } catch (e) {
-          console.error(e);
-          throw e;
-        }
-      }
-      this.refreshSolanaBalance();
-      this.refreshTokenBalances();
-
-      return result.value
-        .map((tx) => tx.transaction.signature)
-        .filter((sig): sig is Buffer => !!sig)
-        .map((sig) => base58.encode(sig));
-    } catch (err) {
-      console.debug("Failed to build transactions", err);
-      return null;
-    }
+    // todo: push to transaction history
+    // todo: toast notification
   }
 }

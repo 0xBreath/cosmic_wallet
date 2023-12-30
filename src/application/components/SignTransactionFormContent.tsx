@@ -12,7 +12,7 @@ import { decodeMessage, InstructionInfo } from "../../shared";
 import UnknownInstruction from "./instructions/UnknownInstruction";
 import SystemInstruction from "../components/instructions/SystemInstruction";
 import TokenInstruction from "../components/instructions/TokenInstruction";
-import { ConnectionModel } from "../../core";
+import { ConnectionManager } from "../../core";
 import { CosmicWallet } from "../../wallet";
 import { PublicKey } from "@solana/web3.js";
 
@@ -29,9 +29,8 @@ export function SignTransactionFormContent({
   autoApprove: boolean;
   buttonRef: React.RefObject<HTMLButtonElement>;
 }): React.JSX.Element {
-  const connection = ConnectionModel.instance.connection;
+  const connection = ConnectionManager.instance.connection;
   const wallet = CosmicWallet.instance;
-  const publicKeys = wallet.tokenAccounts;
 
   const [parsing, setParsing] = useState(true);
   // An array of arrays, where each element is the set of instructions for a
@@ -67,7 +66,9 @@ export function SignTransactionFormContent({
   }, [buttonRef]);
 
   const onOpenAddress = (address: PublicKey) => {
-    const link = ConnectionModel.instance.formatAccountLink(address.toString());
+    const link = ConnectionManager.instance.formatAccountLink(
+      address.toString(),
+    );
     window.open(link, "_blank");
   };
 

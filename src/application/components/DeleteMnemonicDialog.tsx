@@ -1,5 +1,5 @@
-import React  from "react";
-import { useState } from 'react';
+import React from "react";
+import { useState } from "react";
 import { DialogForm } from ".";
 import {
   Button,
@@ -8,7 +8,7 @@ import {
   DialogTitle,
   TextField,
 } from "@mui/material";
-import { WalletSeedModel } from "../../core";
+import { WalletSeedManager } from "../../core";
 
 export function DeleteMnemonicDialog({
   open,
@@ -17,7 +17,7 @@ export function DeleteMnemonicDialog({
   open: boolean;
   onClose: () => void;
 }) {
-  const seedModel = WalletSeedModel.instance;
+  const seedModel = WalletSeedManager.instance;
   const [seedCheck, setSeedCheck] = useState("");
   const mnemonicAndSeed = seedModel.unlockedMnemonicAndSeed.unlockedMnemonic;
   return (

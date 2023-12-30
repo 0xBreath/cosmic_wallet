@@ -5,7 +5,7 @@ import EventEmitter from "events";
 import { useListener } from "../hooks";
 import { PublicKey } from "@solana/web3.js";
 import { TokenListProvider } from "@solana/spl-token-registry";
-import { ConnectionModel } from "../../core";
+import { ConnectionManager } from "../../core";
 
 export type TokenRegistryInfo = {
   mintAddress?: string;
@@ -23,7 +23,7 @@ export type TokenRegistryInfo = {
 // add the mints to that package. To add a token to the `AddTokenDialog`,
 // add the `mintAddress` here. The rest of the fields are not used.
 const POPULAR_TOKENS: { [key in string]: TokenRegistryInfo[] } = {
-  [ConnectionModel.instance.mainnetUrl]: [
+  [ConnectionManager.instance.mainnetUrl]: [
     {
       mintAddress: "SRMuApVNdxXokk5GT7XD5cUUgXMBCoAz2LHeuAoKWRt",
       tokenName: "Serum",
@@ -276,12 +276,12 @@ export function TokenRegistryProvider({
 }: {
   children: React.ReactNode;
 }) {
-  const cluster = ConnectionModel.instance.cluster;
+  const cluster = ConnectionManager.instance.cluster;
 
   const [tokenInfos, setTokenInfos] = useState<TokenRegistryInfo[]>();
 
   useEffect(() => {
-    if (cluster.httpEndPoint !== ConnectionModel.instance.mainnetUrl) return;
+    if (cluster.httpEndPoint !== ConnectionManager.instance.mainnetUrl) return;
     const tokenListProvider = new TokenListProvider();
     tokenListProvider.resolve().then((tokenListContainer) => {
       const filteredTokenListContainer =
@@ -300,7 +300,7 @@ export function TokenRegistryProvider({
 
       setTokenInfos(tokenInfos);
     });
-  }, [ConnectionModel.instance.cluster]);
+  }, [ConnectionManager.instance.cluster]);
 
   return (
     <TokenListContext.Provider value={{ tokenInfos }}>
@@ -321,7 +321,7 @@ const nameUpdated = new EventEmitter();
 nameUpdated.setMaxListeners(100);
 
 export function useTokenInfo(mint: PublicKey) {
-  const endpoint = ConnectionModel.instance.cluster.httpEndPoint;
+  const endpoint = ConnectionManager.instance.cluster.httpEndPoint;
   useListener(nameUpdated, "update");
   const tokenInfos = useTokenInfos();
   return getTokenInfo(mint, endpoint, tokenInfos);
@@ -355,7 +355,7 @@ export function getTokenInfo(
 }
 
 export function useUpdateTokenName() {
-  const endpoint = ConnectionModel.instance.cluster.httpEndPoint;
+  const endpoint = ConnectionManager.instance.cluster.httpEndPoint;
   return useCallback(
     function updateTokenName(
       mint: PublicKey,
@@ -391,7 +391,7 @@ export function useUpdateTokenName() {
 // Returns tokenInfos for the popular tokens list.
 export function usePopularTokens() {
   const tokenInfos = useTokenInfos();
-  const endpoint = ConnectionModel.instance.cluster.httpEndPoint;
+  const endpoint = ConnectionManager.instance.cluster.httpEndPoint;
   const popularTokens: TokenRegistryInfo[] = !POPULAR_TOKENS[endpoint]
     ? []
     : POPULAR_TOKENS[endpoint];

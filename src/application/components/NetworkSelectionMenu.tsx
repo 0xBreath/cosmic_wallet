@@ -1,4 +1,4 @@
-import { ConnectionModel } from "../../core";
+import { ConnectionManager } from "../../core";
 import React, { useState } from "react";
 import {
   Hidden,
@@ -21,7 +21,7 @@ import {
 import { customTheme } from "../../shared";
 
 export const WebNetworkSelectionMenu = observer(() => {
-  const cluster = ConnectionModel.instance.cluster;
+  const cluster = ConnectionManager.instance.cluster;
   const [anchorEl, setAnchorEl] = useState(null);
   const [addCustomNetworkOpen, setCustomNetworkOpen] = useState(false);
 
@@ -31,7 +31,7 @@ export const WebNetworkSelectionMenu = observer(() => {
         open={addCustomNetworkOpen}
         onClose={() => setCustomNetworkOpen(false)}
         onAdd={({ name, apiUrl }) => {
-          ConnectionModel.instance.setCustomCluster(apiUrl, name);
+          ConnectionManager.instance.setCustomCluster(apiUrl, name);
           setCustomNetworkOpen(false);
         }}
       />
@@ -49,12 +49,12 @@ export const WebNetworkSelectionMenu = observer(() => {
           horizontal: "right",
         }}
       >
-        {ConnectionModel.instance.clusters.map((option) => (
+        {ConnectionManager.instance.clusters.map((option) => (
           <MenuItem
             key={option.httpEndPoint}
             onClick={() => {
               setAnchorEl(null);
-              ConnectionModel.instance.selectCluster(option.slug);
+              ConnectionManager.instance.selectCluster(option.slug);
             }}
             selected={option.httpEndPoint === cluster.httpEndPoint}
           >
@@ -72,7 +72,7 @@ export const WebNetworkSelectionMenu = observer(() => {
           }}
         >
           <StyledListItemIcon />
-          {ConnectionModel.instance.customClusterExists
+          {ConnectionManager.instance.customClusterExists
             ? "Edit Custom Endpoint"
             : "Add Custom Endpoint"}
         </MenuItem>
@@ -82,7 +82,7 @@ export const WebNetworkSelectionMenu = observer(() => {
 });
 
 export const ExtensionNetworkSelectionMenu = observer(() => {
-  const cluster = ConnectionModel.instance.cluster;
+  const cluster = ConnectionManager.instance.cluster;
   const [anchorEl, setAnchorEl] = useState(null);
   const [addCustomNetworkOpen, setCustomNetworkOpen] = useState(false);
 
@@ -92,7 +92,7 @@ export const ExtensionNetworkSelectionMenu = observer(() => {
         open={addCustomNetworkOpen}
         onClose={() => setCustomNetworkOpen(false)}
         onAdd={({ name, apiUrl }) => {
-          ConnectionModel.instance.setCustomCluster(apiUrl, name);
+          ConnectionManager.instance.setCustomCluster(apiUrl, name);
           setCustomNetworkOpen(false);
         }}
       />
@@ -109,12 +109,12 @@ export const ExtensionNetworkSelectionMenu = observer(() => {
           horizontal: "right",
         }}
       >
-        {ConnectionModel.instance.clusters.map((option) => (
+        {ConnectionManager.instance.clusters.map((option) => (
           <MenuItem
             key={option.httpEndPoint}
             onClick={() => {
               setAnchorEl(null);
-              ConnectionModel.instance.selectCluster(option.slug);
+              ConnectionManager.instance.selectCluster(option.slug);
             }}
             selected={option.httpEndPoint === cluster.httpEndPoint}
           >
@@ -132,7 +132,7 @@ export const ExtensionNetworkSelectionMenu = observer(() => {
           }}
         >
           <StyledListItemIcon />
-          {ConnectionModel.instance.customClusterExists
+          {ConnectionManager.instance.customClusterExists
             ? "Edit Custom Endpoint"
             : "Add Custom Endpoint"}
         </MenuItem>

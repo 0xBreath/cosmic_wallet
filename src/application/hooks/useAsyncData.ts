@@ -2,15 +2,15 @@
 // loaded is false when error is present for backwards compatibility
 import { useEffect, useReducer } from "react";
 import { AsyncDataResult, CacheKeyProps, CacheListener } from "../../shared";
-import { CacheModel } from "../../core";
+import { CacheManager } from "../../core";
 
-/// TODO: move to CacheModel
+/// TODO: move to CacheManager
 export function useAsyncData<T = any>(
   fn: () => Promise<T>,
   cacheKeyProps: CacheKeyProps,
   { refreshInterval = 60000 } = {},
 ): AsyncDataResult<T> {
-  const cacheModel = CacheModel.instance;
+  const cacheModel = CacheManager.instance;
 
   const [, rerender] = useReducer((i) => i + 1, 0);
   const cacheKey = JSON.stringify(cacheKeyProps);
