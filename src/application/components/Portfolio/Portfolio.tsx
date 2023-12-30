@@ -73,7 +73,6 @@ const BalancesTable = observer(
 );
 
 export const Portfolio = observer(() => {
-  const cosmicWallet = CosmicWallet.instance;
   const [showTransferPage, setShowTransferPage] = React.useState(false);
   const [tokenInfo, setTokenInfo] = React.useState<TokenTransferInfo | null>(
     null,
