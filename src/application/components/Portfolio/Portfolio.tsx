@@ -14,11 +14,7 @@ import { Typography } from "@mui/material";
 import { TransferTokens } from "..";
 
 const BalancesTable = observer(
-  ({
-    handleSendToken,
-  }: {
-    handleSendToken: (tokenInfo: TokenTransferInfo) => void;
-  }) => {
+  ({ sendToken }: { sendToken: (tokenInfo: TokenTransferInfo) => void }) => {
     const cosmicWallet = CosmicWallet.instance;
 
     return (
@@ -27,7 +23,7 @@ const BalancesTable = observer(
           <TableBody>
             <Row
               onClick={() =>
-                handleSendToken({
+                sendToken({
                   mintOrSol: "sol",
                   accountBalance: cosmicWallet.solanaBalance,
                 })
@@ -48,7 +44,7 @@ const BalancesTable = observer(
                 <>
                   <Row
                     onClick={() =>
-                      handleSendToken({
+                      sendToken({
                         mintOrSol: value.mint,
                         accountBalance: value.uiAmount ?? 0,
                       })
@@ -85,14 +81,14 @@ export const Portfolio = observer(() => {
     setShowTransferPage(false);
   };
 
-  const handleSendToken = (tokenInfo: TokenTransferInfo) => {
+  const sendToken = (tokenInfo: TokenTransferInfo) => {
     setTokenInfo(tokenInfo);
     setShowTransferPage(true);
   };
 
-  if (showTransferPage) {
-    return <TransferTokens tokenInfo={tokenInfo!} onClose={onClose} />;
+  if (showTransferPage && tokenInfo) {
+    return <TransferTokens tokenInfo={tokenInfo} onClose={onClose} />;
   }
 
-  return <BalancesTable handleSendToken={handleSendToken} />;
+  return <BalancesTable sendToken={sendToken} />;
 });

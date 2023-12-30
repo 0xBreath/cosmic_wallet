@@ -564,6 +564,8 @@ export class CosmicWallet {
       this.publicKey,
     );
 
+    this._tokenBalances.clear();
+
     runInAction(() => {
       for (const balance of balances) {
         this._tokenBalances.set(balance.mint, balance);
