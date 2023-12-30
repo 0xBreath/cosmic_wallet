@@ -22,6 +22,7 @@ const BalancesTable = observer(
         <Table>
           <TableBody>
             <Row
+              key="sol"
               onClick={() =>
                 sendToken({
                   mintOrSol: "sol",
@@ -43,6 +44,7 @@ const BalancesTable = observer(
               [...cosmicWallet.tokenBalances.values()].map((value) => (
                 <>
                   <Row
+                    key={value.mint}
                     onClick={() =>
                       sendToken({
                         mintOrSol: value.mint,

@@ -5,24 +5,20 @@ import { AddAccountDialog } from "./AddAccountDialog";
 import { ExportMnemonicDialog } from "./ExportMnemonicDialog";
 import { DeleteMnemonicDialog } from "./DeleteMnemonicDialog";
 import {
+  Button,
   Divider,
-  Hidden,
   IconButton,
-  ListItemIcon,
   Menu,
   MenuItem,
-  styled,
-  Theme,
-  Tooltip,
   Typography,
 } from "@mui/material";
 import {
-  AccountCircleOutlined,
   AddOutlined,
   CheckOutlined,
   ExitToAppOutlined,
   FingerprintOutlined,
   ImportExportOutlined,
+  ContentCopyOutlined,
 } from "@mui/icons-material";
 import {
   copyToClipboard,

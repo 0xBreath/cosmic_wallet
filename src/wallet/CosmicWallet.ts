@@ -142,7 +142,7 @@ export class CosmicWallet {
     this.tokenTransfer = this.tokenTransfer.bind(this);
 
     this.createReactions();
-    this.setWalletSelector(DEFAULT_WALLET_SELECTOR);
+    this._walletSelector = this.walletSelector;
 
     // TODO: Convert to RPC program/account subscriptions instead of polling
     this._asyncPolls.push(
@@ -275,6 +275,38 @@ export class CosmicWallet {
 
   get allowsExport(): boolean {
     return true;
+  }
+
+  get walletAccount(): WalletAccountData | null {
+    const selector = this.walletSelector;
+
+    if (selector.walletIndex || selector.walletIndex === 0) {
+      console.debug("here");
+      const name = this.walletName(selector.walletIndex);
+      const res: WalletAccountData = {
+        selector,
+        address: this.publicKey!,
+        name,
+        isSelected: true,
+      };
+      console.debug("derived", res);
+      return res;
+    } else if (selector.importedPubkey) {
+      console.debug("there");
+      const imported =
+        this.seedManager.privateKeyImports[selector.importedPubkey.toString()];
+      const name = imported.name;
+      const res: WalletAccountData = {
+        selector,
+        address: selector.importedPubkey,
+        name,
+        isSelected: true,
+      };
+      console.debug("imported", res);
+      return res;
+    } else {
+      return null;
+    }
   }
 
   get walletAccounts(): WalletAccounts {

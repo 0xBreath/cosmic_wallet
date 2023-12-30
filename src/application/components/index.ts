@@ -22,3 +22,4 @@ export * from "./Portfolio";
 export * from "./ExpandViewButton";
 export * from "./TransferTokens";
 export * from "./AddressSelectionMenu";
+export * from "./AddressDisplay";

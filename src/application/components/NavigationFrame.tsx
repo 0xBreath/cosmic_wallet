@@ -18,6 +18,7 @@ import {
   WebNetworkSelectionMenu,
   StyledButton,
   ExpandViewButton,
+  AddressDisplay,
 } from ".";
 import {
   AspectRatioOutlined,
@@ -33,6 +34,7 @@ import {
 import { Page, useConnectedWallets, usePage } from "../providers";
 import { observer } from "mobx-react";
 import { useIsExtensionWidth } from "../hooks";
+import { CosmicWallet } from "../../wallet";
 
 const Content = styled("div")(({ theme }) => ({
   [theme.breakpoints.down(theme.breakpoints.values.ext)]: {
@@ -53,6 +55,7 @@ const StyledBadge: typeof Badge = styled(Badge)(
 
 export const NavigationFrame = observer(
   ({ children }: { children: React.ReactNode }) => {
+    const cosmicWallet = CosmicWallet.instance;
     const isExtensionWidth = useIsExtensionWidth();
 
     return (
@@ -76,6 +79,7 @@ export const NavigationFrame = observer(
             >
               COSMIC WALLET
             </Typography>
+            <AddressDisplay />
             {isExtensionWidth ? (
               <ExpandViewButton />
             ) : (

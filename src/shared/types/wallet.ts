@@ -32,20 +32,6 @@ export interface WalletAccountData {
   isSelected: boolean;
 }
 
-export interface CosmicWalletState {
-  seed?: string;
-  mnemonic?: string;
-  importsEncryptionKey?: string;
-  setWalletSelector: any;
-  privateKeyImports: Record<string, PrivateKeyImport>;
-  setPrivateKeyImports: any;
-  accounts: any;
-  derivedAccounts: WalletAccountData[];
-  addAccount: any;
-  setAccountName: any;
-  derivationPath: string;
-}
-
 export type MnemonicAndSeed = {
   mnemonic?: string;
   seed?: string;

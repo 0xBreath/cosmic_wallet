@@ -3,6 +3,8 @@ import { customTheme } from "../../../shared";
 
 export const Container = styled("div")(({ theme }) => ({
   width: "100%",
+  paddingTop: "30px",
+  paddingBottom: "30px",
   display: "flex",
   justifyContent: "center",
   alignItems: "center",
@@ -28,7 +30,7 @@ export const Table = styled("table")(({ theme }) => ({
 
 export const TableBody = styled("tbody")(({ theme }) => ({
   [theme.breakpoints.up(theme.breakpoints.values.ext)]: {
-    width: "90%",
+    width: "95%",
   },
   [theme.breakpoints.down(theme.breakpoints.values.ext)]: {
     width: "100%",
@@ -41,7 +43,7 @@ export const TableBody = styled("tbody")(({ theme }) => ({
 
 export const Row = styled("tr")(({ theme }) => ({
   width: "100%",
-  height: "60px",
+  height: "80px",
 
   paddingLeft: "20px",
   paddingRight: "20px",
