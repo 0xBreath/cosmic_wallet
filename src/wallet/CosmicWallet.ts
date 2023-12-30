@@ -45,9 +45,14 @@ import {
   keypairToAsyncSigner,
   sendTransaction,
   transfer,
+  createAssociatedTokenAccountIdempotent,
 } from "@staratlas/data-source";
 import { SupportedTransactionVersions } from "@solana/wallet-adapter-base/src/transaction";
-import { Account, getAssociatedTokenAddressSync } from "@solana/spl-token";
+import {
+  Account,
+  createTransferCheckedInstruction,
+  getAssociatedTokenAddressSync,
+} from "@solana/spl-token";
 import { Adapter } from "@solana/wallet-adapter-base";
 import { Buffer } from "buffer";
 import { setIntervalAsync } from "set-interval-async/dynamic";
@@ -624,6 +629,40 @@ export class CosmicWallet {
     // todo: toast notification
   }
 
+  async tokenTransfer(
+    mint: PublicKey,
+    destination: PublicKey,
+    amount: number,
+  ): Promise<void> {
+    if (!this.signer) return;
+
+    const fromAta = getAssociatedTokenAddressSync(mint, this.publicKey);
+
+    const toAta: { address; instructions } =
+      createAssociatedTokenAccountIdempotent(mint, destination);
+
+    const transferIxs: InstructionReturn = async (funder) => ({
+      instruction: createTransferCheckedInstruction(
+        fromAta, // from (should be a token account)
+        mint, // mint
+        toAta.address, // to (should be a token account)
+        this.publicKey, // from's owner
+        amount, // amount, if your decimals is 8, send 10^8 for 1 token
+        8, // todo: find a way to get this, for now assume 8
+      ),
+      signers: [this.signer],
+    });
+
+    const ixs = [toAta.instructions, transferIxs];
+    const sigs = await this.sendTransaction(ixs);
+    for (const sig in sigs) {
+      console.log(
+        "token transfer:",
+        this.connectionModel.formatTransactionLink(sig),
+      );
+    }
+  }
+
   /*
    *
    * Manage building, signing, and sending transactions
@@ -660,7 +699,6 @@ export class CosmicWallet {
       return null;
     }
 
-    console.debug("Transaction result:", transaction);
     await this.refreshEverything();
 
     return [sigOrErr.value];

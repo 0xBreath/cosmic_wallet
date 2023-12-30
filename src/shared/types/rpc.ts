@@ -27,7 +27,9 @@ export type InstructionInfo = {
   programId?: PublicKey;
 };
 
+export type MintOrSol = string | "sol";
+
 export type TokenTransferInfo = {
-  mintOrSol: string | "sol";
+  mintOrSol: MintOrSol;
   accountBalance: number;
 };

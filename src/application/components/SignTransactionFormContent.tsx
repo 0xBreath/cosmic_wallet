@@ -1,5 +1,5 @@
 import React from "react";
-import { useEffect, useState } from 'react';
+import { useEffect, useState } from "react";
 import bs58 from "bs58";
 import {
   Box,
@@ -67,7 +67,7 @@ export function SignTransactionFormContent({
   }, [buttonRef]);
 
   const onOpenAddress = (address: PublicKey) => {
-    const link = wallet.formatExplorerAccountLink(address.toString());
+    const link = ConnectionModel.instance.formatAccountLink(address.toString());
     window.open(link, "_blank");
   };
 

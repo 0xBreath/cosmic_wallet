@@ -54,6 +54,7 @@ const StyledBadge: typeof Badge = styled(Badge)(
 export const NavigationFrame = observer(
   ({ children }: { children: React.ReactNode }) => {
     const isExtensionWidth = useIsExtensionWidth();
+
     return (
       <>
         <AppBar position="static">
@@ -89,11 +90,10 @@ export const NavigationFrame = observer(
 );
 
 function navigationButtons(): React.JSX.Element[] {
-  // const isExtensionWidth = useIsExtensionWidth();
+  const isExtensionWidth = useIsExtensionWidth();
   const { page } = usePage();
-  const [anchorEl, setAnchorEl] = useState(null);
 
-  if (isExtensionPopup || isExtension) {
+  if (isExtensionPopup || isExtensionWidth) {
     return [];
   }
 

@@ -29,6 +29,7 @@ export class ConnectionModel {
     this.getConnection = this.getConnection.bind(this);
     this.formatTransactionLink = this.formatTransactionLink.bind(this);
     this.formatAccountLink = this.formatAccountLink.bind(this);
+    this.formatMessageLink = this.formatMessageLink.bind(this);
     this.logTransactionResult = this.logTransactionResult.bind(this);
 
     const defaultCluster = (
@@ -155,9 +156,28 @@ export class ConnectionModel {
     switch (this.cluster.slug) {
       case "mainnet-beta":
         return `https://explorer.solana.com/address/${key}`;
+      case "localnet":
       case "custom":
         const clusterUrl = encodeURIComponent(this.connection.rpcEndpoint);
         return `https://explorer.solana.com/address/${key}?cluster=custom&customUrl=${clusterUrl}`;
+      default:
+        throw new Error("Invalid cluster slug for formatExplorerAccountLink");
+    }
+  }
+
+  formatMessageLink(transaction: Transaction): string {
+    const serializedTransaction = transaction.serializeMessage();
+    const message = encodeURIComponent(
+      serializedTransaction.toString("base64"),
+    );
+
+    switch (this.cluster.slug) {
+      case "mainnet-beta":
+        return `https://explorer.solana.com/tx/inspector?message=${message}`;
+      case "localnet":
+      case "custom":
+        const clusterUrl = encodeURIComponent(this.connection.rpcEndpoint);
+        return `https://explorer.solana.com/tx/inspector?message=${message}&cluster=custom&customUrl=${clusterUrl}`;
       default:
         throw new Error("Invalid cluster slug for formatExplorerAccountLink");
     }
@@ -168,6 +188,8 @@ export class ConnectionModel {
       console.debug("Transaction has no signature");
       return;
     }
+
+    console.debug("Message link: ", this.formatMessageLink(transaction));
 
     console.debug(
       `Transaction link: ${this.formatTransactionLink(

@@ -1,5 +1,10 @@
 import { InstructionInfo, ParsedTokenBalance } from "../types";
-import { Account, TOKEN_PROGRAM_ID, unpackAccount } from "@solana/spl-token";
+import {
+  Account,
+  createTransferCheckedInstruction,
+  TOKEN_PROGRAM_ID,
+  unpackAccount,
+} from "@solana/spl-token";
 import {
   AccountInfo,
   AccountMeta,
@@ -305,65 +310,3 @@ const handleSystemInstruction = (
     data: decoded,
   };
 };
-
-// async function getTokenAccountInfo(owner: PublicKey): Promise<ParsedKeyedAccount[] | undefined> {
-//   const connection = ConnectionModel.instance.connection;
-//
-//   let accounts: KeyedAccountInfo[] = await getRawAccountsByOwner(
-//     connection,
-//     owner,
-//   );
-//   return accounts
-//     .map(({ accountId, accountInfo }) => {
-//       // todo: convert to Map within this class
-//       setInitialAccountInfo(connection, accountId, accountInfo);
-//       return {
-//         publicKey: accountId,
-//         parsed: parseTokenAccountData(accountId, accountInfo),
-//       };
-//     })
-//     .sort((account1, account2) =>
-//       account1.parsed.mint
-//         .toString()
-//         .localeCompare(account2.parsed.mint.toString()),
-//     );
-// };
-//
-// async function createTokenAccount(signer: AsyncSigner, mint: PublicKey): Promise<void> {
-//   const ix = await createTokenAccount(signer, signer.publicKey(), mint);
-//   return await TransactionManager.instance.buildAndSendTransaction(ix, this.signer);
-// };
-//
-// async function createAssociatedTokenAccount (mint: PublicKey): Promise<void> {
-//   if (!this.publicKey) return;
-//   const ix = createAssociatedTokenAccountIdempotent(
-//     mint,
-//     this.publicKey,
-//   );
-//   return await TransactionManager.instance.buildAndSendTransaction(ix.instructions, this.signer);
-// };
-//
-// async function tokenAccountCost(mint: PublicKey): Promise<number> {
-//   const mintState = await getMint(this.connection, mint, ConnectionModel.instance.commitment);
-//   const space = getAccountLenForMint(mintState);
-//   return await this.connection.getMinimumBalanceForRentExemption(space);
-// };
-//
-// async function transferToken(
-//   mint: PublicKey,
-//   destination: PublicKey,
-//   amount: number,
-// ): Promise<void> {
-//   const { address: from, instructions } = createAssociatedTokenAccountIdempotent(
-//     mint,
-//     this.signer.publicKey(),
-//     true
-//   );
-//   const ix = transferToTokenAccount(this.signer, from, destination, amount);
-//   return await TransactionManager.instance.buildAndSendTransaction([instructions, ix], this.signer);
-// };
-//
-// async function transferSol(destination: PublicKey, amount: number): Promise<void> {
-//   const ix = transfer(this.signer, destination, amount);
-//   return await TransactionManager.instance.buildAndSendTransaction(ix, this.signer);
-// };

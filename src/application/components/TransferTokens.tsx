@@ -25,6 +25,17 @@ export const TransferTokens = observer(
       setRecipient(address.toString());
     };
 
+    const handleSendToken = () => {
+      const amountNumber = parseFloat(amountString);
+      const destination = new PublicKey(recipient);
+      if (tokenInfo.mintOrSol === "sol") {
+        cosmicWallet.nativeTransfer(destination, amountNumber);
+      } else {
+        const mint = new PublicKey(tokenInfo.mintOrSol);
+        cosmicWallet.tokenTransfer(mint, destination, amountNumber);
+      }
+    };
+
     return (
       <Page>
         <HeaderRow>
@@ -33,7 +44,7 @@ export const TransferTokens = observer(
             fontSize="large"
             style={{
               position: "absolute",
-              top: "0px",
+              top: "3px",
               left: "5px",
             }}
             onClick={onClose}
@@ -107,11 +118,7 @@ export const TransferTokens = observer(
             type="button"
             color="primary"
             disabled={!amountString || !recipient}
-            onClick={() => {
-              const amountNumber = parseFloat(amountString);
-              const destination = new PublicKey(recipient);
-              cosmicWallet.nativeTransfer(destination, amountNumber);
-            }}
+            onClick={() => handleSendToken()}
           >
             SEND
           </Button>

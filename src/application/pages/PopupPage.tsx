@@ -1,10 +1,4 @@
-import {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import React from "react";
 import { PublicKey } from "@solana/web3.js";
 import {
@@ -65,7 +59,7 @@ function getInitialRequests() {
 }
 
 export function PopupPage({ opener }: { opener: any }) {
-  console.debug('PopupPage');
+  console.log("PopupPage");
 
   const origin = useMemo(() => {
     let params = new URLSearchParams(window.location.hash.slice(1));
