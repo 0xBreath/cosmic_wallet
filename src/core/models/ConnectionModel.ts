@@ -1,5 +1,7 @@
-import { Commitment, Connection } from "@solana/web3.js";
+import { Commitment, Connection, Transaction } from "@solana/web3.js";
 import { action, computed, makeAutoObservable, makeObservable } from "mobx";
+import { formatExplorerLink } from "@staratlas/data-source/src/transactions/transactionHandling";
+import bs58 from "bs58";
 
 export const DEFAULT_CLUSTER = "localnet";
 export const DEFAULT_COMMITMENT = "confirmed";
@@ -20,11 +22,14 @@ type ConnectionModelData = {
 
 export class ConnectionModel {
   constructor() {
-    makeObservable(this, {
-      connection: computed,
-      selectCluster: action.bound,
-      cluster: computed,
-    });
+    makeAutoObservable(this);
+
+    this.selectCluster = this.selectCluster.bind(this);
+    this.setCustomCluster = this.setCustomCluster.bind(this);
+    this.getConnection = this.getConnection.bind(this);
+    this.formatTransactionLink = this.formatTransactionLink.bind(this);
+    this.formatAccountLink = this.formatAccountLink.bind(this);
+    this.logTransactionResult = this.logTransactionResult.bind(this);
 
     const defaultCluster = (
       !!process.env.SOLANA_CLUSTER &&
@@ -131,5 +136,43 @@ export class ConnectionModel {
       connection,
       cluster,
     };
+  }
+
+  formatTransactionLink(txSig: string): string {
+    switch (this.cluster.slug) {
+      case "mainnet-beta":
+        return `https://explorer.solana.com/tx/${txSig}`;
+      case "localnet":
+      case "custom":
+        const clusterUrl = encodeURIComponent(this.connection.rpcEndpoint);
+        return `https://explorer.solana.com/tx/${txSig}?cluster=custom&customUrl=${clusterUrl}`;
+      default:
+        throw new Error("Invalid cluster slug for formatExplorerAccountLink");
+    }
+  }
+
+  formatAccountLink(key: string): string {
+    switch (this.cluster.slug) {
+      case "mainnet-beta":
+        return `https://explorer.solana.com/address/${key}`;
+      case "custom":
+        const clusterUrl = encodeURIComponent(this.connection.rpcEndpoint);
+        return `https://explorer.solana.com/address/${key}?cluster=custom&customUrl=${clusterUrl}`;
+      default:
+        throw new Error("Invalid cluster slug for formatExplorerAccountLink");
+    }
+  }
+
+  logTransactionResult(transaction: Transaction): void {
+    if (!transaction.signature) {
+      console.debug("Transaction has no signature");
+      return;
+    }
+
+    console.debug(
+      `Transaction link: ${this.formatTransactionLink(
+        bs58.encode(transaction.signature),
+      )}`,
+    );
   }
 }

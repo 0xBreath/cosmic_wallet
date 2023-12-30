@@ -44,6 +44,7 @@ import {
   InstructionReturn,
   keypairToAsyncSigner,
   sendTransaction,
+  transfer,
 } from "@staratlas/data-source";
 import { SupportedTransactionVersions } from "@solana/wallet-adapter-base/src/transaction";
 import { Account, getAssociatedTokenAddressSync } from "@solana/spl-token";
@@ -125,8 +126,6 @@ export class CosmicWallet {
     this.initSigner = this.initSigner.bind(this);
     this.refreshWalletAccounts = this.refreshWalletAccounts.bind(this);
     this.fetchAllTokenAccounts = this.fetchAllTokenAccounts.bind(this);
-    this.logTransactionResult = this.logTransactionResult.bind(this);
-    this.formatExplorerAccountLink = this.formatExplorerAccountLink.bind(this);
 
     this.createReactions();
     this.setWalletSelector(DEFAULT_WALLET_SELECTOR);
@@ -602,6 +601,31 @@ export class CosmicWallet {
 
   /*
    *
+   * Instruction builders
+   *
+   */
+
+  async nativeTransfer(destination: PublicKey, amount: number): Promise<void> {
+    if (!this.signer) return;
+
+    const ix: InstructionReturn = transfer(
+      this.signer,
+      destination,
+      amount * LAMPORTS_PER_SOL,
+    );
+    const sigs = await this.sendTransaction(ix);
+    for (const sig in sigs) {
+      console.log(
+        "native transfer:",
+        this.connectionModel.formatTransactionLink(sig),
+      );
+    }
+    // todo: push to transaction history
+    // todo: toast notification
+  }
+
+  /*
+   *
    * Manage building, signing, and sending transactions
    *
    */
@@ -619,7 +643,7 @@ export class CosmicWallet {
       },
     );
 
-    this.logTransactionResult(transaction.transaction);
+    this.connectionModel.logTransactionResult(transaction.transaction);
 
     const result = await sendTransaction(
       transaction,
@@ -637,8 +661,7 @@ export class CosmicWallet {
     }
 
     console.debug("Transaction result:", transaction);
-    this.refreshSolanaBalance();
-    this.refreshTokenBalances();
+    await this.refreshEverything();
 
     return [sigOrErr.value];
   }
@@ -665,7 +688,7 @@ export class CosmicWallet {
       }
 
       for (const transaction of result.value) {
-        this.logTransactionResult(transaction.transaction);
+        this.connectionModel.logTransactionResult(transaction.transaction);
 
         try {
           const response = await sendTransaction(
@@ -694,34 +717,6 @@ export class CosmicWallet {
     } catch (err) {
       console.debug("Failed to build transactions", err);
       return null;
-    }
-  }
-
-  logTransactionResult(transaction: Transaction): void {
-    if (!transaction.signature) {
-      console.debug("Transaction has no signature");
-      return;
-    }
-
-    console.debug(
-      `Explorer link: ${formatExplorerLink(
-        bs58.encode(transaction.signature),
-        this.connectionModel.connection,
-      )}`,
-    );
-  }
-
-  formatExplorerAccountLink(key: string): string {
-    const connection = this.connectionModel.connection;
-    const slug = this.connectionModel.cluster.slug;
-    switch (slug) {
-      case "mainnet-beta":
-        return `https://explorer.solana.com/address/${key}`;
-      case "custom":
-        const clusterUrl = encodeURIComponent(connection.rpcEndpoint);
-        return `https://explorer.solana.com/address/${key}?cluster=custom&customUrl=${clusterUrl}`;
-      default:
-        throw new Error("Invalid cluster slug for formatExplorerAccountLink");
     }
   }
 }

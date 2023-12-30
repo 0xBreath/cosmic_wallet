@@ -17,7 +17,6 @@ import {
   WebAccountSelectionMenu,
   WebNetworkSelectionMenu,
   StyledButton,
-  NavigationActionButton,
   ExpandViewButton,
 } from ".";
 import {

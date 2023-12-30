@@ -2,7 +2,11 @@ import React, { useState } from "react";
 import { observer } from "mobx-react";
 import { customTheme, TokenTransferInfo } from "../../shared";
 import { Button, styled, TextField, Typography } from "@mui/material";
-import { CloseOutlined } from "@mui/icons-material";
+import { CloseOutlined, FingerprintOutlined } from "@mui/icons-material";
+import { PublicKey } from "@solana/web3.js";
+import { CosmicWallet } from "../../wallet";
+import { AddressSelectionMenu } from "./AddressSelectionMenu";
+import { KeyboardArrowDownOutlined } from "@mui/icons-material";
 
 export const TransferTokens = observer(
   ({
@@ -12,8 +16,14 @@ export const TransferTokens = observer(
     tokenInfo: TokenTransferInfo;
     onClose: () => void;
   }) => {
+    const cosmicWallet = CosmicWallet.instance;
     const [amountString, setAmountString] = useState<string>("");
     const [recipient, setRecipient] = useState<string>("");
+    const [anchorEl, setAnchorEl] = useState(null);
+
+    const handleSelectAddress = (address: PublicKey) => {
+      setRecipient(address.toString());
+    };
 
     return (
       <Page>
@@ -22,11 +32,9 @@ export const TransferTokens = observer(
             htmlColor={customTheme.red}
             fontSize="large"
             style={{
-              // align to top left corner
-              position: "fixed",
-              textAlign: "left",
-              top: "110px",
-              left: "15px",
+              position: "absolute",
+              top: "0px",
+              left: "5px",
             }}
             onClick={onClose}
           />
@@ -50,18 +58,31 @@ export const TransferTokens = observer(
           </TextHelperWrapper>
         </TextFieldWrapper>
         <TextFieldWrapper>
-          <TextField
-            type="text"
-            placeholder="Recipient"
-            label="Recipient"
-            fullWidth
-            variant="outlined"
-            margin="normal"
-            value={recipient}
-            onChange={(e: any) => {
-              setRecipient(e.target.value);
-            }}
-          />
+          <AddressSelectionWrapper>
+            <TextField
+              type="text"
+              placeholder="Recipient"
+              label="Recipient"
+              fullWidth
+              variant="outlined"
+              margin="normal"
+              value={recipient}
+              onChange={(e: any) => {
+                setRecipient(e.target.value);
+              }}
+            />
+
+            <KeyboardArrowDownOutlined
+              fontSize="large"
+              htmlColor={customTheme.gold}
+              onClick={(e: any) => setAnchorEl(e.target)}
+            />
+            <AddressSelectionMenu
+              anchorEl={anchorEl}
+              setAnchorEl={setAnchorEl}
+              handleSelectAddress={handleSelectAddress}
+            />
+          </AddressSelectionWrapper>
           <TextHelperWrapper align="left">
             {/* TODO: how to check for them */}
             <Typography variant="body1" color={customTheme.red}>
@@ -88,7 +109,8 @@ export const TransferTokens = observer(
             disabled={!amountString || !recipient}
             onClick={() => {
               const amountNumber = parseFloat(amountString);
-              console.log("send:", amountNumber);
+              const destination = new PublicKey(recipient);
+              cosmicWallet.nativeTransfer(destination, amountNumber);
             }}
           >
             SEND
@@ -150,4 +172,12 @@ const ButtonRow = styled("div")(({ theme }) => ({
   alignItems: "center",
   width: "80%",
   marginTop: "20px",
+}));
+
+const AddressSelectionWrapper = styled("div")(({ theme }) => ({
+  display: "flex",
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "space-between",
+  width: "100%",
 }));
