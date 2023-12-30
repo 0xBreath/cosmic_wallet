@@ -8,22 +8,25 @@ import { CosmicWallet } from "../../wallet";
 export const AddressDisplay = observer(() => {
   const cosmicWallet = CosmicWallet.instance;
 
-  if (!cosmicWallet.walletAccount || !cosmicWallet.walletAccount.name) {
+  const account = cosmicWallet.walletAccount;
+  if (!account.keypair) {
     return null;
   }
 
+  console.debug("account keypair", account.keypair.publicKey);
   return (
     <Container>
       <PublicKeyWrapper>
-        <Typography variant="h3">{cosmicWallet.walletAccount.name}</Typography>
+        <Typography variant="h3">{account.name}</Typography>
         <Typography variant="body1" color="textSecondary">
-          {shortenAddress(cosmicWallet.walletAccount.address.toString())}
+          {shortenAddress(account.keypair.publicKey.toString())}
         </Typography>
       </PublicKeyWrapper>
       <IconButton
-        onClick={() =>
-          copyToClipboard(cosmicWallet.walletAccount.address.toString())
-        }
+        onClick={() => {
+          account.keypair &&
+            copyToClipboard(account.keypair.publicKey.toString());
+        }}
       >
         <ContentCopyOutlined fontSize="small" />
       </IconButton>

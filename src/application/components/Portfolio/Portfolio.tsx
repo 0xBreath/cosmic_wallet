@@ -22,7 +22,7 @@ const BalancesTable = observer(
         <Table>
           <TableBody>
             <Row
-              key="sol"
+              key={Math.random()}
               onClick={() =>
                 sendToken({
                   mintOrSol: "sol",
@@ -30,10 +30,10 @@ const BalancesTable = observer(
                 })
               }
             >
-              <Cell align="left">
+              <Cell align="left" key={Math.random()}>
                 <Typography variant="body1">SOL</Typography>
               </Cell>
-              <Cell align="right">
+              <Cell align="right" key={Math.random()}>
                 <Typography variant="body1">
                   {cosmicWallet.solanaBalance}
                 </Typography>
@@ -52,12 +52,12 @@ const BalancesTable = observer(
                       })
                     }
                   >
-                    <Cell align="left">
+                    <Cell align="left" key={Math.random()}>
                       <Typography variant="body1">
                         {shortenAddress(value.mint)}
                       </Typography>
                     </Cell>
-                    <Cell align="right">
+                    <Cell align="right" key={Math.random()}>
                       <Typography variant="body1">
                         {shortenNumber(value.uiAmount ?? 0)}
                       </Typography>

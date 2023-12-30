@@ -15,16 +15,10 @@ import { Keypair } from "@solana/web3.js";
 import { WalletSeedManager } from "../../core";
 import { observer } from "mobx-react";
 import { customTheme } from "../../shared";
-import { CosmicWallet } from "../../wallet";
-
-export type OnAddProps = {
-  name: string;
-  importedAccount: Keypair | undefined;
-};
 
 export type AddAccountDialogProps = {
   open: boolean;
-  onAdd: (onAddProps: OnAddProps) => void;
+  onAdd: (name: string, importedAccount: Keypair | undefined) => void;
   onClose: () => void;
 };
 
@@ -110,7 +104,7 @@ export const AddAccountDialog = observer((props: AddAccountDialogProps) => {
           type="submit"
           color="primary"
           disabled={!isAddEnabled}
-          onClick={() => onAdd({ name, importedAccount })}
+          onClick={() => onAdd(name, importedAccount)}
         >
           Add
         </Button>

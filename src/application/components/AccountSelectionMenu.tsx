@@ -4,34 +4,26 @@ import { CosmicWallet } from "../../wallet";
 import { AddAccountDialog } from "./AddAccountDialog";
 import { ExportMnemonicDialog } from "./ExportMnemonicDialog";
 import { DeleteMnemonicDialog } from "./DeleteMnemonicDialog";
-import {
-  Button,
-  Divider,
-  IconButton,
-  Menu,
-  MenuItem,
-  Typography,
-} from "@mui/material";
+import { Divider, Menu, MenuItem, Typography } from "@mui/material";
 import {
   AddOutlined,
   CheckOutlined,
   ExitToAppOutlined,
   FingerprintOutlined,
   ImportExportOutlined,
-  ContentCopyOutlined,
 } from "@mui/icons-material";
 import {
   copyToClipboard,
   customTheme,
   shortenAddress,
-  WalletAccountData,
+  WalletAccount,
 } from "../../shared";
 import { NavigationActionButton, StyledButton, StyledListItemIcon } from ".";
 
 export const WebAccountSelectionMenu = observer(
   (): React.JSX.Element | null => {
     const cosmicWallet = CosmicWallet.instance;
-    const { addAccount, setWalletSelector } = cosmicWallet;
+    const { setWalletAccount, addAndSetAccount } = cosmicWallet;
 
     const [anchorEl, setAnchorEl] = useState(null);
     const [addAccountOpen, setAddAccountOpen] = useState(false);
@@ -47,16 +39,8 @@ export const WebAccountSelectionMenu = observer(
         <AddAccountDialog
           open={addAccountOpen}
           onClose={() => setAddAccountOpen(false)}
-          onAdd={({ name, importedAccount }) => {
-            addAccount({ name, importedAccount });
-            setWalletSelector({
-              walletIndex: importedAccount
-                ? undefined
-                : cosmicWallet.walletAccounts.derivedAccounts.length,
-              importedPubkey: importedAccount
-                ? importedAccount.publicKey
-                : undefined,
-            });
+          onAdd={(name, importedAccount) => {
+            addAndSetAccount(name, importedAccount);
             setAddAccountOpen(false);
           }}
         />
@@ -85,7 +69,7 @@ export const WebAccountSelectionMenu = observer(
               key={Math.random()}
               account={account}
               setAnchorEl={setAnchorEl}
-              setWalletSelector={setWalletSelector}
+              setWalletAccount={setWalletAccount}
             />
           ))}
           <Divider />
@@ -131,7 +115,7 @@ export const WebAccountSelectionMenu = observer(
 export const ExtensionAccountSelectionMenu = observer(
   (): React.JSX.Element | null => {
     const cosmicWallet = CosmicWallet.instance;
-    const { addAccount, setWalletSelector } = cosmicWallet;
+    const { setWalletAccount, addAndSetAccount } = cosmicWallet;
 
     const [anchorEl, setAnchorEl] = useState(null);
     const [addAccountOpen, setAddAccountOpen] = useState(false);
@@ -147,16 +131,8 @@ export const ExtensionAccountSelectionMenu = observer(
         <AddAccountDialog
           open={addAccountOpen}
           onClose={() => setAddAccountOpen(false)}
-          onAdd={({ name, importedAccount }) => {
-            addAccount({ name, importedAccount });
-            setWalletSelector({
-              walletIndex: importedAccount
-                ? undefined
-                : cosmicWallet.walletAccounts.derivedAccounts.length,
-              importedPubkey: importedAccount
-                ? importedAccount.publicKey
-                : undefined,
-            });
+          onAdd={(name, importedAccount) => {
+            addAndSetAccount(name, importedAccount);
             setAddAccountOpen(false);
           }}
         />
@@ -191,7 +167,7 @@ export const ExtensionAccountSelectionMenu = observer(
               key={Math.random()}
               account={account}
               setAnchorEl={setAnchorEl}
-              setWalletSelector={setWalletSelector}
+              setWalletAccount={setWalletAccount}
             />
           ))}
           <Divider />
@@ -238,19 +214,19 @@ export const ExtensionAccountSelectionMenu = observer(
 const AccountListItem = ({
   account,
   setAnchorEl,
-  setWalletSelector,
+  setWalletAccount,
 }: {
-  account: WalletAccountData;
+  account: WalletAccount;
   setAnchorEl: any;
-  setWalletSelector: any;
+  setWalletAccount: any;
 }) => {
   return (
     <MenuItem
-      key={account.address.toString()}
+      key={account.keypair.publicKey.toString()}
       onClick={() => {
         setAnchorEl(null);
-        setWalletSelector(account.selector);
-        copyToClipboard(account.address.toString());
+        setWalletAccount(account);
+        copyToClipboard(account.keypair.publicKey.toString());
       }}
       selected={account.isSelected}
       component="div"
@@ -261,7 +237,7 @@ const AccountListItem = ({
       <div style={{ display: "flex", flexDirection: "column" }}>
         <Typography variant="h3">{account.name}</Typography>
         <Typography variant="body1" color="textSecondary">
-          {shortenAddress(account.address.toString())}
+          {shortenAddress(account.keypair.publicKey.toString())}
         </Typography>
       </div>
     </MenuItem>

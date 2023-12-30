@@ -53,6 +53,7 @@ export const TransferTokens = observer(
         </HeaderRow>
         <TextFieldWrapper>
           <TextField
+            key={Math.random()}
             type="text"
             placeholder="Amount"
             label="Amount"
@@ -71,6 +72,7 @@ export const TransferTokens = observer(
         <TextFieldWrapper>
           <AddressSelectionWrapper>
             <TextField
+              key={Math.random()}
               type="text"
               placeholder="Recipient"
               label="Recipient"

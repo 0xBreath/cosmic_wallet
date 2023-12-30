@@ -2,10 +2,11 @@ import { BinaryLike, pbkdf2 } from "crypto";
 import nacl, { randomBytes, secretbox } from "tweetnacl";
 import { EventEmitter } from "events";
 import {
+  Address,
+  ImportedAccount,
   isExtension,
   LockedMnemonicAndSeed,
   MnemonicAndSeed,
-  PrivateKeyImport,
   UnlockedMnemonicAndSeed,
 } from "../../shared";
 import bs58 from "bs58";
@@ -32,14 +33,13 @@ export class WalletSeedManager {
     bip44Change: "bip44Change",
     bip44Root: "bip44Root", // Ledger only.
   };
-  private static PRIVATE_KEY_IMPORTS_KEY = "walletPrivateKeyImports";
+  private static IMPORTED_ADDRESSES_KEY = "walletImportedAddresses";
 
   /// State
-  // todo: walletSeedListenerState = 0;
   currentUnlockedMnemonicAndSeed: MnemonicAndSeed | null = null;
   walletSeedChanged = new EventEmitter();
   protected _reactions: any[] = [];
-  protected _privateKeyImports: Record<string, PrivateKeyImport> = {};
+  protected _importedAddresses: Record<Address, ImportedAccount> = {};
 
   constructor() {
     makeAutoObservable(this);
@@ -60,7 +60,7 @@ export class WalletSeedManager {
     this.deriveEncryptionKey = this.deriveEncryptionKey.bind(this);
     this.lockWallet = this.lockWallet.bind(this);
     this.forgetWallet = this.forgetWallet.bind(this);
-    this.setPrivateKeyImports = this.setPrivateKeyImports.bind(this);
+    this.setImportedAccounts = this.setImportedAccounts.bind(this);
     this.decodeKeypair = this.decodeKeypair.bind(this);
     this.createReactions = this.createReactions.bind(this);
 
@@ -90,8 +90,6 @@ export class WalletSeedManager {
     };
   })();
 
-  /// Alias for [`useUnlockedMnemonicAndSeed`]
-  /// Functions like a hook. Returns mnemonic and seed, and a boolean indicating loading state.
   get unlockedMnemonicAndSeed(): UnlockedMnemonicAndSeed {
     return this.currentUnlockedMnemonicAndSeed
       ? {
@@ -101,8 +99,6 @@ export class WalletSeedManager {
       : { unlockedMnemonic: WalletSeedManager.EMPTY_MNEMONIC, loading: true };
   }
 
-  /// Alias for [`useHasLockedMnemonicAndSeed`]
-  /// Functions as a hook.
   get hasLockedMnemonicAndSeed(): LockedMnemonicAndSeed {
     const { unlockedMnemonic, loading } = this.unlockedMnemonicAndSeed;
     return {
@@ -112,52 +108,47 @@ export class WalletSeedManager {
     };
   }
 
-  get privateKeyImports(): Record<string, PrivateKeyImport> {
+  get importedAccounts(): Record<string, ImportedAccount> {
     const value: string | null = localStorage.getItem(
-      WalletSeedManager.PRIVATE_KEY_IMPORTS_KEY,
+      WalletSeedManager.IMPORTED_ADDRESSES_KEY,
     );
     if (!value) {
-      const parsedValue = {} as Record<string, PrivateKeyImport>;
+      const parsedValue = {} as Record<string, ImportedAccount>;
       localStorage.setItem(
-        WalletSeedManager.PRIVATE_KEY_IMPORTS_KEY,
+        WalletSeedManager.IMPORTED_ADDRESSES_KEY,
         JSON.stringify(parsedValue),
       );
-      this._privateKeyImports = parsedValue;
-      return this._privateKeyImports;
+      this._importedAddresses = parsedValue;
+      return this._importedAddresses;
     } else {
       const parsedValue = JSON.parse(value);
       if (
-        JSON.stringify(this._privateKeyImports) !== JSON.stringify(parsedValue)
+        JSON.stringify(this._importedAddresses) !== JSON.stringify(parsedValue)
       ) {
-        this._privateKeyImports = parsedValue;
+        this._importedAddresses = parsedValue;
       }
-      return this._privateKeyImports;
+      return this._importedAddresses;
     }
   }
 
-  setPrivateKeyImports(value: Record<string, PrivateKeyImport> | null): void {
-    console.log("setPrivateKeyImports value");
+  setImportedAccounts(value: Record<string, ImportedAccount>): void {
     const cachedValue = localStorage.getItem(
-      WalletSeedManager.PRIVATE_KEY_IMPORTS_KEY,
+      WalletSeedManager.IMPORTED_ADDRESSES_KEY,
     );
     if (value === null && cachedValue === null) {
-      console.log("reset setPrivateKeyImports");
-      localStorage.removeItem(WalletSeedManager.PRIVATE_KEY_IMPORTS_KEY);
+      localStorage.removeItem(WalletSeedManager.IMPORTED_ADDRESSES_KEY);
+      this._importedAddresses = {};
       return;
     }
     const serValue = JSON.stringify(value);
-    console.log("update setPrivateKeyImports", serValue);
-    localStorage.setItem(WalletSeedManager.PRIVATE_KEY_IMPORTS_KEY, serValue);
-    if (JSON.stringify(this._privateKeyImports) !== serValue) {
-      this._privateKeyImports = value;
+    localStorage.setItem(WalletSeedManager.IMPORTED_ADDRESSES_KEY, serValue);
+    if (JSON.stringify(this._importedAddresses) !== serValue) {
+      this._importedAddresses = value;
     }
   }
 
   /// Returns the 32 byte key used to encrypt imported private keys.
   deriveImportsEncryptionKey(seed: string): Buffer | undefined {
-    // SLIP16 derivation path.
-    // return bip32.fromSeed(Buffer.from(seed, "hex")).derivePath("m/10016'/0")
-    //   .privateKey;
     const key = HDKey.fromMasterSeed(Buffer.from(seed, "hex"));
     const derivedKey = key.derive("m/10016'/0");
     return derivedKey.privateKey as Buffer;
@@ -297,7 +288,6 @@ export class WalletSeedManager {
           data: decodedPlaintext,
         });
       } else {
-        console.log("unlock wallet, stay logged in");
         sessionStorage.setItem("unlocked", decodedPlaintext);
       }
     }
@@ -309,7 +299,6 @@ export class WalletSeedManager {
       derivationPath,
     };
 
-    console.log("unlock wallet");
     this.setUnlockedMnemonicAndSeed(mnemonicAndSeed);
     return { mnemonic, seed, derivationPath };
   }
@@ -365,6 +354,11 @@ export class WalletSeedManager {
     }
   }
 
+  /// "Seed" refers to one of the addresses under the main account,
+  ///
+  /// which is derived from the 24 word mnemonic.
+  ///
+  /// The wallet index is what differentiates the addresses
   public seedToKeypair(
     seed: string,
     walletIndex: number,
@@ -394,14 +388,12 @@ export class WalletSeedManager {
       const keypair = Keypair.fromSecretKey(
         new Uint8Array(JSON.parse(privateKey)),
       );
-      console.log("add account from buffer", keypair.publicKey.toString());
       return keypair;
     } catch (e: any) {
       try {
         const keypair = Keypair.fromSecretKey(
           new Uint8Array(bs58.decode(privateKey)),
         );
-        console.log("add account from string", keypair.publicKey.toString());
         return keypair;
       } catch (e: any) {
         return undefined;

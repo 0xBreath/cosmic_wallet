@@ -11,12 +11,6 @@ export interface AsyncDataResult<T> {
   error: any;
 }
 
-export type LocalStorageAddressInfo = {
-  index: number;
-  address: PublicKey;
-  name: string | null;
-};
-
 export interface CacheListener<T> {
   cacheKey: string;
   fn: () => Promise<T>;

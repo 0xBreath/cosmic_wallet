@@ -77,6 +77,10 @@ const CreateWalletForm = observer(() => {
   const [savedWords, setSavedWords] = useState(false);
 
   function submit(password: string) {
+    if (!_newMAndS) {
+      console.error("No mnemonic and seed in CreateWalletForm");
+      return;
+    }
     const { mnemonic, seed } = _newMAndS;
     if (!mnemonic || !seed) {
       console.error("No mnemonic or seed in CreateWalletForm");
@@ -124,7 +128,8 @@ const SeedWordsForm = observer(
     const [showDialog, setShowDialog] = useState(false);
     const [seedCheck, setSeedCheck] = useState("");
 
-    const downloadMnemonic = (mnemonic: string) => {
+    const downloadMnemonic = (mnemonic?: string): void => {
+      if (!mnemonic) return;
       const url = window.URL.createObjectURL(new Blob([mnemonic]));
       const link = document.createElement("a");
       link.href = url;
@@ -226,19 +231,16 @@ const SeedWordsForm = observer(
           <DialogTitle>
             <Typography variant="h3">Confirm Mnemonic</Typography>
           </DialogTitle>
-          <DialogContentText
-            style={{ margin: 20, backgroundColor: customTheme.dark }}
+          <div
+            style={{
+              margin: "20px",
+              backgroundColor: customTheme.dark,
+            }}
           >
-            <div
-              style={{
-                display: "flex",
-                flexDirection: "column",
-                background: customTheme.dark,
-              }}
-            >
+            <Typography variant="body1">
               Please re-enter your seed phrase to confirm that you have saved
               it.
-            </div>
+            </Typography>
             <TextField
               label={`Please type your seed phrase to confirm`}
               fullWidth
@@ -247,7 +249,7 @@ const SeedWordsForm = observer(
               value={seedCheck}
               onChange={(e) => setSeedCheck(e.target.value)}
             />
-          </DialogContentText>
+          </div>
           <DialogActions>
             <Button onClick={() => setShowDialog(false)}>Close</Button>
             <Button
