@@ -83,7 +83,6 @@ export class TokenManager {
       for (const balance of balances) {
         this._tokenBalances.set(balance.mint, balance);
       }
-      console.log("refreshed token balances");
       this.refreshTokenState = RefreshState.Ready;
     });
   }

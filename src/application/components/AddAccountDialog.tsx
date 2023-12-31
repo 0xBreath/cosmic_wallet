@@ -51,9 +51,7 @@ export const AddAccountDialog = observer((props: AddAccountDialogProps) => {
         },
       }}
     >
-      <DialogTitle>
-        <Typography variant="h2">Add account</Typography>
-      </DialogTitle>
+      <DialogTitle variant="h2">Add account</DialogTitle>
       <DialogContent style={{ paddingTop: 16 }}>
         <div
           style={{

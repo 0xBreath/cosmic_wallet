@@ -9,11 +9,10 @@ export const AddressDisplay = observer(() => {
   const cosmicWallet = CosmicWallet.instance;
 
   const account = cosmicWallet.walletAccount;
-  if (!account.keypair) {
+  if (!account || !account.name || !account.keypair) {
     return null;
   }
 
-  console.debug("account keypair", account.keypair.publicKey);
   return (
     <Container>
       <PublicKeyWrapper>

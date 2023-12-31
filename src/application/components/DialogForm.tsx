@@ -1,5 +1,6 @@
 import React from "react";
 import { Dialog, DialogProps, useMediaQuery, useTheme } from "@mui/material";
+import { customTheme } from "../../shared";
 
 export type DialogFormProps = {
   onEntry?: () => void;

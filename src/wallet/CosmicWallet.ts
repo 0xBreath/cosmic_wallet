@@ -57,7 +57,7 @@ export class CosmicWallet {
     derivedAccounts: [],
     importedAccounts: [],
   };
-  protected _walletCount: number = 0;
+  protected _walletCount: number = 1;
   protected _walletAccount: WalletAccount = DEFAULT_WALLET_ACCOUNT;
   protected _walletNames: Record<Address, Name> = {};
 
@@ -69,24 +69,41 @@ export class CosmicWallet {
 
     this.tokenManager = new TokenManager(this.publicKey);
 
-    // Manage seed, private key, and wallet accounts
-    this.setWalletAccount = this.setWalletAccount.bind(this);
+    // Manage derived account index
     this.setWalletCount = this.setWalletCount.bind(this);
+
+    // Manage wallet account names
     this.setWalletName = this.setWalletName.bind(this);
-    this.createReactions = this.createReactions.bind(this);
-    this.addAccount = this.addAccount.bind(this);
-    this.setAccountName = this.setAccountName.bind(this);
-    this.create = this.create.bind(this);
-    this.connect = this.connect.bind(this);
-    this.initSigner = this.initSigner.bind(this);
-    this.addAndSetAccount = this.addAndSetAccount.bind(this);
+    this.walletName = this.walletName.bind(this);
     this.walletAccountByName = this.walletAccountByName.bind(this);
+
+    // Mange creating new derived or imported accounts
+    this.createAccount = this.createAccount.bind(this);
+    this.createAndSetAccount = this.createAndSetAccount.bind(this);
+    this.createDerivedAccount = this.createDerivedAccount.bind(this);
+    this.createImportedAccount = this.createImportedAccount.bind(this);
+
+    // Manage initializing signer/wallet from existing derived or imported account
+    this.initSigner = this.initSigner.bind(this);
+    this.initDerivedAccount = this.initDerivedAccount.bind(this);
+    this.initImportedAccount = this.initImportedAccount.bind(this);
+    this.initNewAccount = this.initNewAccount.bind(this);
+
+    // Set active wallet account and its name
+    this.setWalletAccount = this.setWalletAccount.bind(this);
+    this.setAccountName = this.setAccountName.bind(this);
 
     // Transaction handlers
     this.nativeTransfer = this.nativeTransfer.bind(this);
     this.tokenTransfer = this.tokenTransfer.bind(this);
 
+    // Misc
+    this.createReactions = this.createReactions.bind(this);
+    this.connect = this.connect.bind(this);
+
+    // Initial setup
     this.createReactions();
+    this.refreshWalletAccounts();
   }
 
   /*
@@ -115,7 +132,7 @@ export class CosmicWallet {
 
   connect(): void {
     if (!this.signer || !this.publicKey) {
-      this.create();
+      this.initSigner();
     }
     return;
   }
@@ -151,78 +168,146 @@ export class CosmicWallet {
    *
    */
 
-  /// If it exists, it loads all addresses associated with the seed.
-  async create(): Promise<void> {
-    if (!this.seedManager.currentUnlockedMnemonicAndSeed) return;
-    const { seed } = this.seedManager.currentUnlockedMnemonicAndSeed;
-    if (!seed) {
-      console.log("No seed in create");
-      return;
-    }
-
-    this.initSigner();
-  }
-
   initSigner(): void {
     if (!this.seedManager.currentUnlockedMnemonicAndSeed) return;
     const { seed, importsEncryptionKey, derivationPath } =
       this.seedManager.currentUnlockedMnemonicAndSeed;
     if (!seed || !importsEncryptionKey) return;
 
-    if (!this.isImported(this.walletAccount)) {
-      let account = this.walletAccount as DerivedAccount;
-      if (!account.keypair) {
-        account.keypair = this.seedManager.seedToKeypair(
-          seed,
-          account.walletIndex,
-          derivationPath,
-        );
-      }
-      if (!account.name) {
-        account.name = "Main account";
-      }
-      console.debug(
-        "Init CosmicWallet signer from seed",
-        JSON.stringify(account),
-      );
-      this.signer = keypairToAsyncSigner(account.keypair);
+    if (
+      JSON.stringify(this.walletAccount) ===
+        JSON.stringify(DEFAULT_WALLET_ACCOUNT) &&
+      !this.walletAccount.keypair
+    ) {
+      this.initNewAccount();
     } else {
-      const account = this.walletAccount as ImportedAccount;
-      const { nonce, ciphertext } =
-        this.seedManager.importedAccounts[
-          account.keypair?.publicKey.toString()
-        ];
-      const secret: Uint8Array | null = nacl.secretbox.open(
-        bs58.decode(account.ciphertext),
-        bs58.decode(account.nonce),
-        importsEncryptionKey,
-      );
-      if (!secret) {
-        console.error("Failed to find imported wallet secret");
-        return;
+      if (this.isImported(this.walletAccount)) {
+        this.initImportedAccount();
+      } else {
+        this.initDerivedAccount();
       }
-      console.debug(
-        "Init CosmicWallet signer from imported secret",
-        JSON.stringify(account),
+    }
+    this.refreshWalletAccounts();
+    this.tokenManager.refreshEverything();
+    if (!this.signer || !this.publicKey) {
+      throw new Error("Failed to init signer");
+    }
+    this.tokenManager = new TokenManager(this.publicKey);
+  }
+
+  initImportedAccount(): void {
+    if (!this.seedManager.currentUnlockedMnemonicAndSeed) {
+      throw new Error(
+        "initImportedAccount: Missing unlocked mnemonic and seed",
       );
-      this.signer = keypairToAsyncSigner(Keypair.fromSecretKey(secret));
+    }
+    const { seed, importsEncryptionKey, derivationPath } =
+      this.seedManager.currentUnlockedMnemonicAndSeed;
+    if (!seed || !importsEncryptionKey) {
+      throw new Error(
+        "initImportedAccount: Missing seed or importsEncryptionKey",
+      );
+    }
+    const account = this.walletAccount as ImportedAccount;
+    const secret: Uint8Array | null = nacl.secretbox.open(
+      bs58.decode(account.ciphertext),
+      bs58.decode(account.nonce),
+      importsEncryptionKey,
+    );
+    if (!secret) {
+      console.error("Failed to find imported wallet secret");
+      throw new Error("initImportedAccount: secret is undefined");
+    }
+    console.log("Init import signer");
+    const keypair = Keypair.fromSecretKey(secret);
+    this.signer = keypairToAsyncSigner(keypair);
+    this.setWalletAccount(account as WalletAccount);
+  }
+
+  initDerivedAccount(): void {
+    if (!this.seedManager.currentUnlockedMnemonicAndSeed) {
+      throw new Error("initDerivedAccount: Missing unlocked mnemonic and seed");
+    }
+    const { seed, importsEncryptionKey, derivationPath } =
+      this.seedManager.currentUnlockedMnemonicAndSeed;
+    if (!seed || !importsEncryptionKey) {
+      throw new Error(
+        "initDerivedAccount: Missing seed or importsEncryptionKey",
+      );
+    }
+    if (!this.walletAccount) {
+      throw new Error("initDerivedAccount: Missing walletAccount");
+    }
+    let account = this.walletAccount as DerivedAccount;
+    if (!account.keypair) {
+      account.keypair = this.seedManager.seedToKeypair(
+        seed,
+        account.walletIndex,
+        derivationPath,
+      );
+    }
+    const name = this.walletName(account.keypair.publicKey);
+    if (!name) {
+      throw new Error(
+        `Missing name for derived account: ${account.keypair.publicKey.toString()}`,
+      );
+    }
+    account.name = name;
+    this.signer = keypairToAsyncSigner(account.keypair);
+    this.setWalletAccount(account as WalletAccount);
+    console.log(
+      "Update derived signer from seed: ",
+      name,
+      this.signer.publicKey().toString(),
+    );
+  }
+
+  /// Functions the same as `createDerivedAccount`
+  /// but also sets the new account as the current wallet.
+  /// Primarily used for creating the first account from the mnemonic.
+  initNewAccount(): void {
+    if (!this.seedManager.currentUnlockedMnemonicAndSeed) {
+      throw new Error("initNewAccount: Missing unlocked mnemonic and seed");
+    }
+    const { seed, importsEncryptionKey, derivationPath } =
+      this.seedManager.currentUnlockedMnemonicAndSeed;
+    if (!seed || !importsEncryptionKey) {
+      throw new Error("initNewAccount: Missing seed or importsEncryptionKey");
     }
 
-    this.tokenManager.refreshEverything();
-    this.tokenManager = new TokenManager(this.signer.publicKey());
+    const keypair = this.seedManager.seedToKeypair(seed, 0, derivationPath);
+    const name = "Main account";
+    const account: DerivedAccount = {
+      keypair,
+      name,
+      isSelected: true,
+      walletIndex: 0,
+    };
+    this.signer = keypairToAsyncSigner(keypair);
+    this.setWalletName(keypair.publicKey, name);
+    this.setWalletAccount(account as WalletAccount);
+    this.setWalletCount(1);
+    console.log(
+      "Init new derived signer",
+      name,
+      this.signer.publicKey().toString(),
+    );
   }
 
   createReactions(): void {
     this._reactions.push(
-      autorun(() => {
-        this.refreshWalletAccounts();
-      }),
-    );
-    this._reactions.push(
       reaction(
         () => this.seedManager.unlockedMnemonicAndSeed,
         () => {
-          this.create();
+          this.initSigner();
+        },
+      ),
+    );
+    this._reactions.push(
+      reaction(
+        () => this.walletAccount,
+        () => {
+          this.initSigner();
         },
       ),
     );
@@ -248,63 +333,20 @@ export class CosmicWallet {
 
   /*
    *
-   * Wallet accounts
+   * Wallet derived account index
    *
    */
-
-  get walletAccounts(): WalletAccounts {
-    return this._walletAccounts;
-  }
-
-  get walletAccount(): WalletAccount {
-    const value: string | null = localStorage.getItem(
-      CosmicWallet.WALLET_ACCOUNT_KEY,
-    );
-    let account = this._walletAccount;
-    if (value) {
-      account = JSON.parse(value);
-    }
-    this._walletAccount = account;
-    return this._walletAccount;
-  }
-
-  setWalletAccount(value: WalletAccount): void {
-    if (value === null) {
-      localStorage.removeItem(CosmicWallet.WALLET_ACCOUNT_KEY);
-    } else {
-      localStorage.setItem(
-        CosmicWallet.WALLET_ACCOUNT_KEY,
-        JSON.stringify(value),
-      );
-    }
-    if (JSON.stringify(this._walletAccount) !== JSON.stringify(value)) {
-      this._walletAccount = value;
-    }
-    this.initSigner();
-  }
-
-  addAndSetAccount(name: string, importedAccount?: Keypair): void {
-    console.debug("addAndSetAccount", name);
-    this.addAccount({ name, importedAccount });
-    const newAccount = this.walletAccountByName(name);
-    if (!newAccount || !newAccount.keypair) {
-      console.error("Missing new account");
-      return;
-    }
-    console.debug(
-      "newAccount",
-      shortenAddress(newAccount.keypair.publicKey.toString()),
-    );
-    this.setWalletAccount(newAccount);
-  }
 
   get walletCount(): number {
     const value: string | null = localStorage.getItem(
       CosmicWallet.WALLET_COUNT_KEY,
     );
     if (!value) {
-      localStorage.setItem(CosmicWallet.WALLET_COUNT_KEY, "1");
-      this._walletCount = 1;
+      console.log("wallet count is null");
+      localStorage.setItem(
+        CosmicWallet.WALLET_COUNT_KEY,
+        this._walletCount.toString(),
+      );
       return this._walletCount;
     } else {
       const parsedValue = JSON.parse(value);
@@ -322,6 +364,49 @@ export class CosmicWallet {
     }
     localStorage.setItem(CosmicWallet.WALLET_COUNT_KEY, JSON.stringify(value));
     this._walletCount = value;
+  }
+
+  /*
+   *
+   * Manage account names
+   *
+   */
+
+  get walletNames(): Record<Address, Name> {
+    return this._walletNames;
+  }
+
+  setAccountName(account: WalletAccount, newName: string): void {
+    if (!account.keypair) return;
+    if (this.isImported(account)) {
+      let importedAccounts = { ...this.seedManager.importedAccounts };
+      importedAccounts[account.keypair.publicKey.toString()].name = newName;
+      this.seedManager.setImportedAccounts(importedAccounts);
+    } else {
+      this.setWalletName(account.keypair.publicKey, newName);
+    }
+    this.refreshWalletAccounts();
+  }
+
+  /// Adds a wallet to local storage
+  setWalletName(address: PublicKey, name: string | null): void {
+    const cache: string | null = localStorage.getItem(
+      CosmicWallet.WALLET_NAMES_KEY,
+    );
+    let namesRecord: Record<Address, Name> = {};
+    if (cache !== null) {
+      namesRecord = JSON.parse(cache);
+    }
+    if (!name && namesRecord[address.toString()]) {
+      delete namesRecord[address.toString()];
+    } else if (name) {
+      namesRecord[address.toString()] = name;
+    }
+    localStorage.setItem(
+      CosmicWallet.WALLET_NAMES_KEY,
+      JSON.stringify(namesRecord),
+    );
+    this._walletNames = namesRecord;
   }
 
   walletAccountByName(name: string): WalletAccount | null {
@@ -357,35 +442,132 @@ export class CosmicWallet {
     return namesRecord[address.toString()];
   }
 
-  get walletNames(): Record<Address, Name> {
-    return this._walletNames;
+  /*
+   *
+   * Create new derived or imported account
+   *
+   */
+
+  createAndSetAccount(name: string, importedAccount?: Keypair): void {
+    this.createAccount({ name, importedAccount });
+    const newAccount = this.walletAccountByName(name);
+    if (!newAccount || !newAccount.keypair) {
+      console.error("Missing new account");
+      return;
+    }
+    console.log(
+      "newAccount",
+      shortenAddress(newAccount.keypair.publicKey.toString()),
+    );
+    this.setWalletAccount(newAccount);
   }
 
-  /// Adds a wallet to local storage
-  setWalletName(address: PublicKey, name: string | null): void {
-    const cache: string | null = localStorage.getItem(
-      CosmicWallet.WALLET_NAMES_KEY,
-    );
-    let namesRecord: Record<Address, Name> = {};
-    if (cache !== null) {
-      namesRecord = JSON.parse(cache);
+  /// Generates new keypair based on walletIndex (basically a derived account nonce)
+  /// If this is the first wallet account, use `initNewAccount` instead.
+  createDerivedAccount(name: string): void {
+    if (!this.publicKey) return;
+    if (!this.seedManager.currentUnlockedMnemonicAndSeed) return;
+    const { seed, importsEncryptionKey, derivationPath } =
+      this.seedManager.currentUnlockedMnemonicAndSeed;
+    if (!seed || !importsEncryptionKey) {
+      console.error("No encryption key found in addAccount");
+      return;
     }
-    if (!name && namesRecord[address.toString()]) {
-      delete namesRecord[address.toString()];
-    } else if (name) {
-      namesRecord[address.toString()] = name;
+
+    const index = this.walletCount;
+    const keypair = this.seedManager.seedToKeypair(seed, index);
+    this.setWalletName(keypair.publicKey, name);
+    this.setWalletCount(index + 1);
+  }
+
+  createImportedAccount(name: string, importedAccount: Keypair) {
+    if (!this.publicKey) return;
+    if (!this.seedManager.currentUnlockedMnemonicAndSeed) return;
+    const { seed, importsEncryptionKey, derivationPath } =
+      this.seedManager.currentUnlockedMnemonicAndSeed;
+    if (!seed || !importsEncryptionKey) {
+      console.error("No encryption key found in addAccount");
+      return;
     }
+
+    const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
+    const plaintext = importedAccount.secretKey;
+    const ciphertext = nacl.secretbox(plaintext, nonce, importsEncryptionKey);
+
+    const importedAccounts: Record<string, ImportedAccount> = {
+      ...this.seedManager.importedAccounts,
+    };
+    importedAccounts[importedAccount.publicKey.toString()] = {
+      keypair: importedAccount,
+      name,
+      ciphertext: bs58.encode(ciphertext),
+      nonce: bs58.encode(nonce),
+      importedPublicKey: importedAccount.publicKey,
+      isSelected:
+        importedAccount.publicKey.toString() === this.publicKey.toString(),
+    };
+    this.seedManager.setImportedAccounts(importedAccounts);
+  }
+
+  createAccount({
+    name,
+    importedAccount,
+  }: {
+    name: string;
+    importedAccount?: Keypair;
+  }): void {
+    if (!this.publicKey) return;
+    if (!this.seedManager.currentUnlockedMnemonicAndSeed) return;
+    const { seed, importsEncryptionKey, derivationPath } =
+      this.seedManager.currentUnlockedMnemonicAndSeed;
+    if (!seed || !importsEncryptionKey) {
+      console.error("No encryption key found in addAccount");
+      return;
+    }
+
+    if (!importedAccount) {
+      this.createDerivedAccount(name);
+    } else {
+      this.createImportedAccount(name, importedAccount);
+    }
+    this.refreshWalletAccounts();
+    this.tokenManager.refreshEverything();
+  }
+
+  isImported(selector: WalletAccount): boolean {
+    return "importedPublicKey" in selector;
+  }
+
+  diffieHellman(key: PublicKey): BoxKeyPair | null {
+    if (!this.signer || !this.signer.inner) return null;
+    const secret = this.signer.inner().secretKey;
+    return generateDiffieHellman(key, secret);
+  }
+
+  /*
+   *
+   * Read or set update accounts
+   *
+   */
+
+  get walletAccounts(): WalletAccounts {
+    return this._walletAccounts;
+  }
+
+  get walletAccount(): WalletAccount {
+    return this._walletAccount;
+  }
+
+  setWalletAccount(value: WalletAccount): void {
     localStorage.setItem(
-      CosmicWallet.WALLET_NAMES_KEY,
-      JSON.stringify(namesRecord),
+      CosmicWallet.WALLET_ACCOUNT_KEY,
+      JSON.stringify(value),
     );
-    this._walletNames = namesRecord;
+    this._walletAccount = value;
   }
 
   get derivedAccounts(): DerivedAccount[] {
-    console.log("get derivedAccounts");
-    if (!this) return [];
-    if (!this.publicKey) return [];
+    if (!this || !this.publicKey) return [];
     if (!this.seedManager.currentUnlockedMnemonicAndSeed) return [];
     const { seed, derivationPath } =
       this.seedManager.currentUnlockedMnemonicAndSeed;
@@ -404,6 +586,11 @@ export class CosmicWallet {
             `Missing name for derived account: ${keypair.publicKey.toString()}`,
           );
         }
+        console.log(
+          "derived:",
+          name,
+          shortenAddress(keypair.publicKey.toString()),
+        );
         return {
           keypair,
           name,
@@ -431,88 +618,20 @@ export class CosmicWallet {
       return;
     }
 
-    console.log("refreshWalletAccounts before derivedAccounts");
-    const derivedAccounts: DerivedAccount[] =
-      this._walletAccounts.derivedAccounts;
-    console.log("refreshWalletAccounts before derivedAccounts");
+    const derivedAccounts: DerivedAccount[] = this.derivedAccounts;
     const importedAccounts: ImportedAccount[] = [
       ...Object.values(this.seedManager.importedAccounts),
     ];
     const accounts = (derivedAccounts as WalletAccount[]).concat(
       importedAccounts as WalletAccount[],
     );
+    console.log("accounts", accounts.length);
 
     this._walletAccounts = {
       accounts,
       derivedAccounts,
       importedAccounts,
     };
-  }
-
-  addAccount({
-    name,
-    importedAccount,
-  }: {
-    name: string;
-    importedAccount?: Keypair;
-  }): void {
-    if (!this.publicKey) return;
-    if (!this.seedManager.currentUnlockedMnemonicAndSeed) return;
-    const { seed, importsEncryptionKey, derivationPath } =
-      this.seedManager.currentUnlockedMnemonicAndSeed;
-    if (!seed || !importsEncryptionKey) {
-      console.error("No encryption key found in addAccount");
-      return;
-    }
-
-    if (!importedAccount) {
-      const oldWalletCount = this.walletCount;
-      // generates new keypair based on walletIndex (basically a derived account nonce)
-      const keypair = this.seedManager.seedToKeypair(seed, oldWalletCount);
-      this.setWalletName(keypair.publicKey, name);
-      this.setWalletCount(oldWalletCount + 1);
-    } else {
-      const nonce = nacl.randomBytes(nacl.secretbox.nonceLength);
-      const plaintext = importedAccount.secretKey;
-      const ciphertext = nacl.secretbox(plaintext, nonce, importsEncryptionKey);
-
-      let newPrivateKeyImports: Record<string, ImportedAccount> = {
-        ...this.seedManager.importedAccounts,
-      };
-      newPrivateKeyImports[importedAccount.publicKey.toString()] = {
-        keypair: importedAccount,
-        name,
-        ciphertext: bs58.encode(ciphertext),
-        nonce: bs58.encode(nonce),
-        isSelected:
-          importedAccount.publicKey.toString() === this.publicKey.toString(),
-      };
-      this.seedManager.setImportedAccounts(newPrivateKeyImports);
-    }
-    this.refreshWalletAccounts();
-    this.tokenManager.refreshEverything();
-  }
-
-  isImported(selector: WalletAccount): boolean {
-    return !("walletIndex" in selector);
-  }
-
-  setAccountName(account: WalletAccount, newName: string): void {
-    if (!account.keypair) return;
-    if (this.isImported(account)) {
-      let importedAccounts = { ...this.seedManager.importedAccounts };
-      importedAccounts[account.keypair.publicKey.toString()].name = newName;
-      this.seedManager.setImportedAccounts(importedAccounts);
-    } else {
-      this.setWalletName(account.keypair.publicKey, newName);
-    }
-    this.refreshWalletAccounts();
-  }
-
-  diffieHellman(key: PublicKey): BoxKeyPair | null {
-    if (!this.signer || !this.signer.inner) return null;
-    const secret = this.signer.inner().secretKey;
-    return generateDiffieHellman(key, secret);
   }
 
   /*

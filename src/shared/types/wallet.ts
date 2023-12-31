@@ -14,6 +14,7 @@ export interface DerivedAccount extends BaseAccount {
 export interface ImportedAccount extends BaseAccount {
   ciphertext: string;
   nonce: string;
+  importedPublicKey: PublicKey;
 }
 
 export type WalletAccount = DerivedAccount | ImportedAccount;

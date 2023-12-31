@@ -23,7 +23,7 @@ import { NavigationActionButton, StyledButton, StyledListItemIcon } from ".";
 export const WebAccountSelectionMenu = observer(
   (): React.JSX.Element | null => {
     const cosmicWallet = CosmicWallet.instance;
-    const { setWalletAccount, addAndSetAccount } = cosmicWallet;
+    const { setWalletAccount, createAndSetAccount } = cosmicWallet;
 
     const [anchorEl, setAnchorEl] = useState(null);
     const [addAccountOpen, setAddAccountOpen] = useState(false);
@@ -40,7 +40,7 @@ export const WebAccountSelectionMenu = observer(
           open={addAccountOpen}
           onClose={() => setAddAccountOpen(false)}
           onAdd={(name, importedAccount) => {
-            addAndSetAccount(name, importedAccount);
+            createAndSetAccount(name, importedAccount);
             setAddAccountOpen(false);
           }}
         />
@@ -115,7 +115,7 @@ export const WebAccountSelectionMenu = observer(
 export const ExtensionAccountSelectionMenu = observer(
   (): React.JSX.Element | null => {
     const cosmicWallet = CosmicWallet.instance;
-    const { setWalletAccount, addAndSetAccount } = cosmicWallet;
+    const { setWalletAccount, createAndSetAccount } = cosmicWallet;
 
     const [anchorEl, setAnchorEl] = useState(null);
     const [addAccountOpen, setAddAccountOpen] = useState(false);
@@ -132,7 +132,7 @@ export const ExtensionAccountSelectionMenu = observer(
           open={addAccountOpen}
           onClose={() => setAddAccountOpen(false)}
           onAdd={(name, importedAccount) => {
-            addAndSetAccount(name, importedAccount);
+            createAndSetAccount(name, importedAccount);
             setAddAccountOpen(false);
           }}
         />
@@ -220,13 +220,16 @@ const AccountListItem = ({
   setAnchorEl: any;
   setWalletAccount: any;
 }) => {
+  const keypair = account.keypair;
+  if (!keypair || !keypair.publicKey || !account.name) return null;
+
   return (
     <MenuItem
-      key={account.keypair.publicKey.toString()}
+      key={keypair.publicKey.toString()}
       onClick={() => {
         setAnchorEl(null);
         setWalletAccount(account);
-        copyToClipboard(account.keypair.publicKey.toString());
+        copyToClipboard(keypair.publicKey.toString());
       }}
       selected={account.isSelected}
       component="div"
@@ -237,7 +240,7 @@ const AccountListItem = ({
       <div style={{ display: "flex", flexDirection: "column" }}>
         <Typography variant="h3">{account.name}</Typography>
         <Typography variant="body1" color="textSecondary">
-          {shortenAddress(account.keypair.publicKey.toString())}
+          {shortenAddress(keypair.publicKey.toString())}
         </Typography>
       </div>
     </MenuItem>

@@ -228,15 +228,10 @@ const SeedWordsForm = observer(
           onSubmit={goForward}
           fullWidth
         >
-          <DialogTitle>
-            <Typography variant="h3">Confirm Mnemonic</Typography>
-          </DialogTitle>
           <div
-            style={{
-              margin: "20px",
-              backgroundColor: customTheme.dark,
-            }}
+            style={{ backgroundColor: customTheme.dark, padding: "10px 20px" }}
           >
+            <Typography variant="h2">Confirm Mnemonic</Typography>
             <Typography variant="body1">
               Please re-enter your seed phrase to confirm that you have saved
               it.

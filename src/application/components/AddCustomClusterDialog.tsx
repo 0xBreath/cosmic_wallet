@@ -44,9 +44,7 @@ export const AddCustomClusterDialog = (props: AddCustomClusterDialogProps) => {
       onSubmit={() => onAdd({ name, apiUrl })}
       fullWidth
     >
-      <DialogTitle>
-        <Typography variant="h3">Add Custom Network</Typography>
-      </DialogTitle>
+      <DialogTitle variant="h2">Add Custom Network</DialogTitle>
       <DialogContent style={{ paddingTop: 16 }}>
         <div
           style={{

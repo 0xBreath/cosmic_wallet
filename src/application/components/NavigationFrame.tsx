@@ -57,6 +57,7 @@ export const NavigationFrame = observer(
   ({ children }: { children: React.ReactNode }) => {
     const cosmicWallet = CosmicWallet.instance;
     const isExtensionWidth = useIsExtensionWidth();
+    const { page } = usePage();
 
     return (
       <>
@@ -80,11 +81,7 @@ export const NavigationFrame = observer(
               COSMIC WALLET
             </Typography>
             <AddressDisplay />
-            {isExtensionWidth ? (
-              <ExpandViewButton />
-            ) : (
-              navigationButtons().map((button) => button)
-            )}
+            <ButtonGroup />
           </Toolbar>
         </AppBar>
         <Content>{children}</Content>
@@ -93,22 +90,26 @@ export const NavigationFrame = observer(
   },
 );
 
-function navigationButtons(): React.JSX.Element[] {
+function ButtonGroup() {
   const isExtensionWidth = useIsExtensionWidth();
   const { page } = usePage();
 
-  if (isExtensionPopup || isExtensionWidth) {
-    return [];
-  }
-
-  let elements: (React.JSX.Element | null)[] = [];
-  if (page === Page.Wallet) {
-    elements.push(<WebAccountSelectionMenu key={Math.random()} />);
-    elements.push(<WebNetworkSelectionMenu key={Math.random()} />);
-  } else if (page === Page.Connections) {
-    elements = [<WalletButton key={Math.random()} />];
-  }
-  return elements;
+  return (
+    <>
+      {isExtensionWidth && <ExpandViewButton />}
+      {!isExtensionWidth && page === Page.Wallet && (
+        <>
+          <div style={{ paddingLeft: "10px", paddingRight: "10px" }}>
+            <WebAccountSelectionMenu />
+          </div>
+          <div style={{ paddingLeft: "10px", paddingRight: "10px" }}>
+            <WebNetworkSelectionMenu />
+          </div>
+        </>
+      )}
+      {!isExtensionWidth && page === Page.Connections && <WalletButton />}
+    </>
+  );
 }
 
 function WalletButton() {

@@ -3,7 +3,7 @@
     "outDir": "./dist/",
     "sourceMap": true,
     "strictNullChecks": true,
-    "strict": true,
+    "strict": false,
     "noImplicitReturns": false,
     "noImplicitAny": false,
     "module": "esnext",

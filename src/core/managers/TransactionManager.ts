@@ -124,7 +124,7 @@ export class TransactionManager {
   }
 
   async mintAccount(mint: PublicKey): Promise<Mint> {
-    const mintInfo: AccountInfo<Buffer> =
+    const mintInfo: AccountInfo<Buffer> | null =
       await ConnectionManager.instance.connection.getAccountInfo(mint);
     return unpackMint(mint, mintInfo);
   }

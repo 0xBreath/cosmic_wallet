@@ -59,11 +59,11 @@ export const Row = styled("tr")(({ theme }) => ({
     background: customTheme.dark2,
   },
 
-  "&:first-child": {
+  "&:first-of-type": {
     justifyContent: "left",
   },
 
-  "&:last-child": {
+  "&:last-of-type": {
     justifyContent: "right",
   },
 }));
