@@ -2,7 +2,6 @@ import bs58 from "bs58";
 import { Connection, Keypair, PublicKey, Transaction } from "@solana/web3.js";
 import nacl, { BoxKeyPair } from "tweetnacl";
 import {
-  DEFAULT_WALLET_ACCOUNT,
   generateDiffieHellman,
   ParsedTokenBalance,
   RefreshState,
@@ -16,7 +15,6 @@ import {
 } from "../shared";
 import {
   ConnectionManager,
-  PlayerProfileService,
   TokenManager,
   TransactionManager,
   WalletAdapterService,
@@ -27,7 +25,6 @@ import { AsyncSigner, keypairToAsyncSigner } from "@staratlas/data-source";
 import { Adapter } from "@solana/wallet-adapter-base";
 
 export class CosmicWallet {
-  /// Constructor
   private static _instance: CosmicWallet;
   static get instance(): CosmicWallet {
     if (!this._instance) {
@@ -58,7 +55,7 @@ export class CosmicWallet {
     importedAccounts: [],
   };
   protected _walletCount: number = 1;
-  protected _walletAccount: WalletAccount = DEFAULT_WALLET_ACCOUNT;
+  protected _walletAccount: WalletAccount | null = null;
   protected _walletNames: Record<Address, Name> = {};
 
   /// Reactions
@@ -174,11 +171,7 @@ export class CosmicWallet {
       this.seedManager.currentUnlockedMnemonicAndSeed;
     if (!seed || !importsEncryptionKey) return;
 
-    if (
-      JSON.stringify(this.walletAccount) ===
-        JSON.stringify(DEFAULT_WALLET_ACCOUNT) &&
-      !this.walletAccount.keypair
-    ) {
+    if (!this.walletAccount) {
       this.initNewAccount();
     } else {
       if (this.isImported(this.walletAccount)) {
@@ -264,7 +257,7 @@ export class CosmicWallet {
 
   /// Functions the same as `createDerivedAccount`
   /// but also sets the new account as the current wallet.
-  /// Primarily used for creating the first account from the mnemonic.
+  /// Used for creating the first account from the mnemonic.
   initNewAccount(): void {
     if (!this.seedManager.currentUnlockedMnemonicAndSeed) {
       throw new Error("initNewAccount: Missing unlocked mnemonic and seed");
@@ -295,6 +288,7 @@ export class CosmicWallet {
   }
 
   createReactions(): void {
+    this.initSigner();
     this._reactions.push(
       reaction(
         () => this.seedManager.unlockedMnemonicAndSeed,
@@ -311,6 +305,12 @@ export class CosmicWallet {
         },
       ),
     );
+    // this._reactions.push(
+    //   autorun(() => {
+    //     console.log("autorun");
+    //     this.initSigner();
+    //   }),
+    // );
   }
 
   /*
@@ -379,12 +379,12 @@ export class CosmicWallet {
   setAccountName(account: WalletAccount, newName: string): void {
     if (!account.keypair) return;
     if (this.isImported(account)) {
-      let importedAccounts = { ...this.seedManager.importedAccounts };
+      let importedAccounts: Record<Address, ImportedAccount> =
+        this.seedManager.importedAccounts;
       importedAccounts[account.keypair.publicKey.toString()].name = newName;
       this.seedManager.setImportedAccounts(importedAccounts);
-    } else {
-      this.setWalletName(account.keypair.publicKey, newName);
     }
+    this.setWalletName(account.keypair.publicKey, newName);
     this.refreshWalletAccounts();
   }
 
@@ -410,12 +410,18 @@ export class CosmicWallet {
   }
 
   walletAccountByName(name: string): WalletAccount | null {
-    [...Object.values(this._walletAccounts.accounts)].find((account) => {
+    const account: WalletAccount | undefined = [
+      ...Object.values(this._walletAccounts.accounts),
+    ].find((account) => {
       if (account.name === name) {
         return account;
       }
     });
-    return null;
+    if (account) {
+      return account;
+    } else {
+      return null;
+    }
   }
 
   walletName(address: PublicKey): string | null {
@@ -456,7 +462,8 @@ export class CosmicWallet {
       return;
     }
     console.log(
-      "newAccount",
+      "new account",
+      newAccount.name,
       shortenAddress(newAccount.keypair.publicKey.toString()),
     );
     this.setWalletAccount(newAccount);
@@ -494,9 +501,8 @@ export class CosmicWallet {
     const plaintext = importedAccount.secretKey;
     const ciphertext = nacl.secretbox(plaintext, nonce, importsEncryptionKey);
 
-    const importedAccounts: Record<string, ImportedAccount> = {
-      ...this.seedManager.importedAccounts,
-    };
+    const importedAccounts: Record<Address, ImportedAccount> =
+      this.seedManager.importedAccounts;
     importedAccounts[importedAccount.publicKey.toString()] = {
       keypair: importedAccount,
       name,
@@ -507,6 +513,7 @@ export class CosmicWallet {
         importedAccount.publicKey.toString() === this.publicKey.toString(),
     };
     this.seedManager.setImportedAccounts(importedAccounts);
+    this.setWalletName(importedAccount.publicKey, name);
   }
 
   createAccount({
@@ -554,7 +561,7 @@ export class CosmicWallet {
     return this._walletAccounts;
   }
 
-  get walletAccount(): WalletAccount {
+  get walletAccount(): WalletAccount | null {
     return this._walletAccount;
   }
 
@@ -617,14 +624,8 @@ export class CosmicWallet {
     const importedAccounts: ImportedAccount[] = [
       ...Object.values(this.seedManager.importedAccounts),
     ];
-    const accounts = (derivedAccounts as WalletAccount[]).concat(
-      importedAccounts as WalletAccount[],
-    );
-    console.log(
-      "wallet accounts: ",
-      accounts.length,
-      // accounts.map((a) => `name: ${a.name}, keypair? ${!!a.keypair}`),
-    );
+    const accounts: WalletAccount[] = [...derivedAccounts, ...importedAccounts];
+    console.debug("wallet accounts: ", accounts.length);
 
     this._walletAccounts = {
       accounts,

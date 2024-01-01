@@ -19,6 +19,7 @@ import {
   WalletAccount,
 } from "../../shared";
 import { NavigationActionButton, StyledButton, StyledListItemIcon } from ".";
+import { PublicKey } from "@solana/web3.js";
 
 export const WebAccountSelectionMenu = observer(
   (): React.JSX.Element | null => {
@@ -223,10 +224,8 @@ const AccountListItem = ({
   setAnchorEl: any;
   setWalletAccount: any;
 }) => {
-  // todo: keypair is undefined even though its not
-  console.log("account item", account.name, !!account.keypair);
   const keypair = account.keypair;
-  if (!keypair || !keypair.publicKey || !account.name) return null;
+  if (!keypair || !keypair.publicKey) return null;
 
   return (
     <MenuItem

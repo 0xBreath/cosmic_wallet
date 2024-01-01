@@ -7,11 +7,12 @@ import {
   isExtension,
   LockedMnemonicAndSeed,
   MnemonicAndSeed,
+  SerializableImportedAccount,
   UnlockedMnemonicAndSeed,
 } from "../../shared";
 import bs58 from "bs58";
 import { autorun, makeAutoObservable } from "mobx";
-import { Keypair } from "@solana/web3.js";
+import { Keypair, PublicKey } from "@solana/web3.js";
 import { derivePath } from "ed25519-hd-key";
 // [HDKey](https://github.com/paulmillr/scure-bip32/blob/main/test/hdkey.test.ts#L162)
 import { HDKey } from "@scure/bip32";
@@ -39,7 +40,7 @@ export class WalletSeedManager {
   currentUnlockedMnemonicAndSeed: MnemonicAndSeed | null = null;
   walletSeedChanged = new EventEmitter();
   protected _reactions: any[] = [];
-  protected _importedAddresses: Record<Address, ImportedAccount> = {};
+  _importedAddresses: Record<Address, ImportedAccount> = {};
 
   constructor() {
     makeAutoObservable(this);
@@ -108,43 +109,62 @@ export class WalletSeedManager {
     };
   }
 
-  get importedAccounts(): Record<string, ImportedAccount> {
+  get importedAccounts(): Record<Address, ImportedAccount> {
     const value: string | null = localStorage.getItem(
       WalletSeedManager.IMPORTED_ADDRESSES_KEY,
     );
-    if (!value) {
-      const parsedValue = {} as Record<string, ImportedAccount>;
-      localStorage.setItem(
-        WalletSeedManager.IMPORTED_ADDRESSES_KEY,
-        JSON.stringify(parsedValue),
-      );
-      this._importedAddresses = parsedValue;
-      return this._importedAddresses;
-    } else {
-      const parsedValue = JSON.parse(value);
-      if (
-        JSON.stringify(this._importedAddresses) !== JSON.stringify(parsedValue)
-      ) {
-        this._importedAddresses = parsedValue;
-      }
-      return this._importedAddresses;
+    let record: Record<Address, ImportedAccount> = {};
+    if (value) {
+      record = this.deserImportedAccounts(value);
     }
+    // for (const account of Object.values(record)) {
+    //   console.log("import:", account.keypair.publicKey?.toString());
+    // }
+    this._importedAddresses = record;
+    return this._importedAddresses;
   }
 
-  setImportedAccounts(value: Record<string, ImportedAccount>): void {
-    const cachedValue = localStorage.getItem(
-      WalletSeedManager.IMPORTED_ADDRESSES_KEY,
+  serImportedAccounts(accounts: Record<Address, ImportedAccount>): string {
+    const serializableAccounts: SerializableImportedAccount[] = [];
+    for (const account of Object.values(accounts)) {
+      serializableAccounts.push({
+        secretKey: bs58.encode(account.keypair.secretKey),
+        name: account.name,
+        isSelected: account.isSelected,
+        ciphertext: account.ciphertext,
+        nonce: account.nonce,
+        importedPublicKey: account.importedPublicKey.toString(),
+      });
+    }
+    return JSON.stringify(serializableAccounts);
+  }
+
+  deserImportedAccounts(accounts: string): Record<Address, ImportedAccount> {
+    const serializableAccounts: SerializableImportedAccount[] =
+      JSON.parse(accounts);
+    const record: Record<Address, ImportedAccount> = {};
+    for (const account of serializableAccounts) {
+      const value: ImportedAccount = {
+        keypair: Keypair.fromSecretKey(bs58.decode(account.secretKey)),
+        name: account.name,
+        isSelected: account.isSelected,
+        ciphertext: account.ciphertext,
+        nonce: account.nonce,
+        importedPublicKey: new PublicKey(account.importedPublicKey),
+      };
+      record[value.importedPublicKey.toString()] = value;
+    }
+    return record;
+  }
+
+  setImportedAccounts(value: Record<Address, ImportedAccount>): void {
+    console.log(
+      "set imports: ",
+      [...Object.values(value)].map((a) => a.keypair.publicKey.toString()),
     );
-    if (value === null && cachedValue === null) {
-      localStorage.removeItem(WalletSeedManager.IMPORTED_ADDRESSES_KEY);
-      this._importedAddresses = {};
-      return;
-    }
-    const serValue = JSON.stringify(value);
-    localStorage.setItem(WalletSeedManager.IMPORTED_ADDRESSES_KEY, serValue);
-    if (JSON.stringify(this._importedAddresses) !== serValue) {
-      this._importedAddresses = value;
-    }
+    const ser = this.serImportedAccounts(value);
+    localStorage.setItem(WalletSeedManager.IMPORTED_ADDRESSES_KEY, ser);
+    this._importedAddresses = value;
   }
 
   /// Returns the 32 byte key used to encrypt imported private keys.

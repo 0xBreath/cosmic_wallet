@@ -1,7 +1,7 @@
 import { Keypair, PublicKey } from "@solana/web3.js";
 
 export interface BaseAccount {
-  keypair?: Keypair;
+  keypair: Keypair;
   name: string;
   isSelected: boolean;
 }
@@ -19,16 +19,19 @@ export interface ImportedAccount extends BaseAccount {
 
 export type WalletAccount = DerivedAccount | ImportedAccount;
 
-export const DEFAULT_WALLET_ACCOUNT: WalletAccount = {
-  walletIndex: 0,
-  name: "Main account",
-  isSelected: true,
-} as DerivedAccount;
-
 export type WalletAccounts = {
   accounts: WalletAccount[];
   derivedAccounts: DerivedAccount[];
   importedAccounts: ImportedAccount[];
+};
+
+export type SerializableImportedAccount = {
+  secretKey: string;
+  name: string;
+  isSelected: boolean;
+  ciphertext: string;
+  nonce: string;
+  importedPublicKey: string;
 };
 
 export type MnemonicAndSeed = {
