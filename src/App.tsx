@@ -75,6 +75,7 @@ const PageContents = observer(() => {
   }
 
   if (window.opener) {
+    console.log("window.opener");
     return <PopupPage opener={window.opener} />;
   }
 

@@ -102,9 +102,8 @@
     "typescript": "^4.9.5"
   },
   "scripts": {
-    "refresh": "yarn && rm -rf dist && rm -rf .parcel-cache",
-    "maybe:build": "yarn refresh && parcel build manifest.json src/content.tsx src/index.html",
-    "build": "yarn refresh && parcel build manifest.json src/index.html",
+    "wipe": "yarn && rm -rf dist && rm -rf .parcel-cache",
+    "build": "yarn wipe && parcel build manifest.json src/index.html",
     "start": "PORT=3001 parcel src/index.html"
   },
   "keywords": [],

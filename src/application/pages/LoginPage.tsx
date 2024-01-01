@@ -2,7 +2,12 @@ import React from "react";
 import { useEffect, useState } from "react";
 
 import { WalletSeedManager } from "../../core";
-import { DialogForm, LoadingIndicator } from "..";
+import {
+  DialogForm,
+  LoadingIndicator,
+  useExtension,
+  useIsExtensionWidth,
+} from "..";
 import { validateMnemonic } from "bip39";
 import {
   Button,
@@ -44,8 +49,15 @@ export const LoginPage = observer(() => {
     return null;
   }
 
+  // const extension = useIsExtensionWidth();
+
   return (
-    <Container maxWidth="sm">
+    <Container
+      maxWidth="sm"
+      // style={{
+      //   marginBottom: extension ? "30px" : 0,
+      // }}
+    >
       {restore ? (
         <RestoreWalletForm goBack={() => setRestore(false)} />
       ) : (
