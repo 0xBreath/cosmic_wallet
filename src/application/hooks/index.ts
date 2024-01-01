@@ -5,3 +5,4 @@ export * from "./useRefEqual";
 export * from "./useAsyncData";
 export * from "./useIsExtensionWidth";
 export * from "./useRegion";
+export * from "./useExtension";

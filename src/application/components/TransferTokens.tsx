@@ -7,6 +7,7 @@ import { PublicKey } from "@solana/web3.js";
 import { CosmicWallet } from "../../wallet";
 import { AddressSelectionMenu } from "./AddressSelectionMenu";
 import { KeyboardArrowDownOutlined } from "@mui/icons-material";
+import { useExtension } from "../hooks";
 
 export const TransferTokens = observer(
   ({
@@ -36,6 +37,8 @@ export const TransferTokens = observer(
       }
     };
 
+    const extension = useExtension();
+
     return (
       <Page>
         <HeaderRow>
@@ -44,8 +47,8 @@ export const TransferTokens = observer(
             fontSize="large"
             style={{
               position: "absolute",
-              top: "3px",
-              left: "5px",
+              top: extension ? "3px" : "25px",
+              left: extension ? "5px" : "30px",
             }}
             onClick={onClose}
           />
@@ -135,6 +138,8 @@ const Page = styled("div")(({ theme }) => ({
     width: "50%",
     borderRadius: "20px",
     background: customTheme.dark2,
+    marginTop: "50px",
+    padding: "20px 40px",
   },
   [theme.breakpoints.down(theme.breakpoints.values.ext)]: {
     width: "90%",
@@ -180,7 +185,7 @@ const ButtonRow = styled("div")(({ theme }) => ({
   justifyContent: "space-between",
   alignItems: "center",
   width: "80%",
-  marginTop: "20px",
+  marginTop: "30px",
 }));
 
 const AddressSelectionWrapper = styled("div")(({ theme }) => ({
