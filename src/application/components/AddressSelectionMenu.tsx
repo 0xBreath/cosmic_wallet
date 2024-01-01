@@ -1,19 +1,8 @@
-import { Divider, Menu, MenuItem, Typography } from "@mui/material";
-import { StyledListItemIcon } from "./StyledListItemIcon";
-import {
-  AddOutlined,
-  CheckOutlined,
-  ExitToAppOutlined,
-  ImportExportOutlined,
-} from "@mui/icons-material";
+import { Menu, MenuItem, Typography } from "@mui/material";
 import React, { useState } from "react";
 import { observer } from "mobx-react";
 import { CosmicWallet } from "../../wallet";
-import {
-  copyToClipboard,
-  shortenAddress,
-  WalletAccountData,
-} from "../../shared";
+import { shortenAddress } from "../../shared";
 import { PublicKey } from "@solana/web3.js";
 
 export const AddressSelectionMenu = observer(
@@ -40,12 +29,16 @@ export const AddressSelectionMenu = observer(
       >
         {/* TODO: address book from past transactions or manually added addresses */}
         {cosmicWallet.walletAccounts.accounts.map((account) => (
-          <AddressListItem
-            key={Math.random()}
-            address={account.address}
-            setAnchorEl={setAnchorEl}
-            handleSelectAddress={handleSelectAddress}
-          />
+          <>
+            {!!account.keypair && account.keypair.publicKey && (
+              <AddressListItem
+                key={Math.random()}
+                address={account.keypair.publicKey}
+                setAnchorEl={setAnchorEl}
+                handleSelectAddress={handleSelectAddress}
+              />
+            )}
+          </>
         ))}
       </Menu>
     );

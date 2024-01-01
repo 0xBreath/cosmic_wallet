@@ -41,6 +41,12 @@ export const TableBody = styled("tbody")(({ theme }) => ({
   justifyContent: "center",
 }));
 
+export const Divider = styled("span")(({ theme }) => ({
+  width: "100%",
+  height: "1px",
+  background: customTheme.grey,
+}));
+
 export const Row = styled("tr")(({ theme }) => ({
   width: "100%",
   height: "80px",
@@ -52,8 +58,6 @@ export const Row = styled("tr")(({ theme }) => ({
   flexDirection: "row",
   alignItems: "center",
   textAlign: "center",
-
-  borderBottom: `1px solid ${customTheme.grey}`,
 
   "&:hover": {
     background: customTheme.dark2,

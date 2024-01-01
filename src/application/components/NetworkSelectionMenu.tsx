@@ -1,6 +1,7 @@
 import { ConnectionManager } from "../../core";
 import React, { useState } from "react";
 import {
+  Button,
   Hidden,
   IconButton,
   Menu,
@@ -35,11 +36,13 @@ export const WebNetworkSelectionMenu = observer(() => {
           setCustomNetworkOpen(false);
         }}
       />
-      <StyledButton onClick={(e: any) => setAnchorEl(e.target)}>
-        <Typography variant="h2">
-          {cluster?.label.toUpperCase() ?? "Network".toUpperCase()}
-        </Typography>
-      </StyledButton>
+      <Button
+        color="primary"
+        variant="contained"
+        onClick={(e: any) => setAnchorEl(e.target)}
+      >
+        <Typography variant="h2">NETWORK</Typography>
+      </Button>
       <Menu
         anchorEl={anchorEl}
         open={!!anchorEl}

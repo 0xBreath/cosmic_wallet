@@ -4,7 +4,8 @@ import { createTheme, Theme } from "@mui/material";
 export const customTheme = {
   light: "#e9e9e7",
   cream: "#fcecca",
-  grey: "#575148",
+  grey: "#9b9080",
+  grey2: "#726654",
   dark: "#121215",
   dark2: "#19191e",
 
@@ -45,7 +46,7 @@ export const theme: Theme = createTheme({
     primary: {
       light: customTheme.light,
       main: customTheme.gold,
-      dark: customTheme.dark,
+      dark: customTheme.grey,
     },
     secondary: {
       light: customTheme.grey,

@@ -64,8 +64,11 @@ I think it's a zip of the `dist` that is published to chrome web store
 
 <h3 style="color: yellow"> TODO </h3>
 
-- [ ] Impl SOL transfer logic, UI to setup trx, popup to sign transaction
-- [ ] Impl SPL transfer logic, UI to setup trx, popup to sign transaction
-- [ ] Impl player profile adapter logic to `CosmicWallet`
+- [ ] Popup to sign transaction
+- [ ] Impl player profile logic in `CosmicWallet`
 - [ ] Impl create profile and keys logic, UI to setup trx, popup to sign transaction
 - [ ] Impl sign trx with profile key, UI to setup, popup to sign transaction
+- [ ] Explorer - to not leave the app to analyze the chain
+- [ ] Jupiter API for advanced trading features - to not leave the app to trade
+- [ ] Covesting - to not leave the app to earn high yield at a low risk
+- [ ] ZK

@@ -42,17 +42,20 @@ export const TransferTokens = observer(
     return (
       <Page>
         <HeaderRow>
-          <CloseOutlined
-            htmlColor={customTheme.red}
-            fontSize="large"
-            style={{
-              position: "absolute",
-              top: extension ? "3px" : "25px",
-              left: extension ? "5px" : "30px",
-            }}
-            onClick={onClose}
-          />
-          <Typography variant="h2">Send Token</Typography>
+          <ExitWrapper>
+            <CloseOutlined
+              htmlColor={customTheme.red}
+              fontSize="large"
+              onClick={onClose}
+              style={{
+                // background: customTheme.cocoa,
+                borderRadius: "10px",
+              }}
+            />
+          </ExitWrapper>
+          <TitleWrapper>
+            <Typography variant="h2">Send Token</Typography>
+          </TitleWrapper>
         </HeaderRow>
         <TextFieldWrapper>
           <TextField
@@ -111,6 +114,7 @@ export const TransferTokens = observer(
           <Button
             type="reset"
             color="secondary"
+            variant="outlined"
             onClick={() => {
               setAmountString("");
               setRecipient("");
@@ -122,6 +126,7 @@ export const TransferTokens = observer(
           <Button
             type="button"
             color="primary"
+            variant="contained"
             disabled={!amountString || !recipient}
             onClick={() => handleSendToken()}
           >
@@ -152,14 +157,6 @@ const Page = styled("div")(({ theme }) => ({
   justifyContent: "center",
   border: "none",
   position: "relative",
-}));
-
-const HeaderRow = styled("div")(({ theme }) => ({
-  display: "flex",
-  flexDirection: "row",
-  alignItems: "center",
-  justifyContent: "center",
-  width: "100%",
 }));
 
 const TextFieldWrapper = styled("div")(({ theme }) => ({
@@ -194,4 +191,28 @@ const AddressSelectionWrapper = styled("div")(({ theme }) => ({
   alignItems: "center",
   justifyContent: "space-between",
   width: "100%",
+}));
+
+const HeaderRow = styled("div")(({ theme }) => ({
+  display: "flex",
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  width: "100%",
+}));
+
+const ExitWrapper = styled("div")(({ theme }) => ({
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  width: "10%",
+}));
+
+const TitleWrapper = styled("div")(({ theme }) => ({
+  display: "flex",
+  flexDirection: "row",
+  alignItems: "center",
+  justifyContent: "center",
+  marginRight: "100px",
+  width: "90%",
 }));

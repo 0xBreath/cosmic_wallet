@@ -4,7 +4,7 @@ import { CosmicWallet } from "../../wallet";
 import { AddAccountDialog } from "./AddAccountDialog";
 import { ExportMnemonicDialog } from "./ExportMnemonicDialog";
 import { DeleteMnemonicDialog } from "./DeleteMnemonicDialog";
-import { Divider, Menu, MenuItem, Typography } from "@mui/material";
+import { Button, Divider, Menu, MenuItem, Typography } from "@mui/material";
 import {
   AddOutlined,
   CheckOutlined,
@@ -52,9 +52,13 @@ export const WebAccountSelectionMenu = observer(
           open={deleteMnemonicOpen}
           onClose={() => setDeleteMnemonicOpen(false)}
         />
-        <StyledButton onClick={(e: any) => setAnchorEl(e.target)}>
-          <Typography variant="h2">{"Account".toUpperCase()}</Typography>
-        </StyledButton>
+        <Button
+          color="primary"
+          variant="contained"
+          onClick={(e: any) => setAnchorEl(e.target)}
+        >
+          <Typography variant="h2">ACCOUNT</Typography>
+        </Button>
         <Menu
           anchorEl={anchorEl}
           open={!!anchorEl}
@@ -210,7 +214,6 @@ export const ExtensionAccountSelectionMenu = observer(
   },
 );
 
-// todo: types
 const AccountListItem = ({
   account,
   setAnchorEl,
@@ -220,6 +223,8 @@ const AccountListItem = ({
   setAnchorEl: any;
   setWalletAccount: any;
 }) => {
+  // todo: keypair is undefined even though its not
+  console.log("account item", account.name, !!account.keypair);
   const keypair = account.keypair;
   if (!keypair || !keypair.publicKey || !account.name) return null;
 

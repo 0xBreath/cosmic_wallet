@@ -33,7 +33,7 @@ import {
 } from "../../shared";
 import { Page, useConnectedWallets, usePage } from "../providers";
 import { observer } from "mobx-react";
-import { useIsExtensionWidth } from "../hooks";
+import { useExtension, useIsExtensionWidth } from "../hooks";
 import { CosmicWallet } from "../../wallet";
 
 const Content = styled("div")(({ theme }) => ({
@@ -56,8 +56,7 @@ const StyledBadge: typeof Badge = styled(Badge)(
 export const NavigationFrame = observer(
   ({ children }: { children: React.ReactNode }) => {
     const cosmicWallet = CosmicWallet.instance;
-    const isExtensionWidth = useIsExtensionWidth();
-    const { page } = usePage();
+    const extension = useExtension();
 
     return (
       <>
@@ -67,21 +66,35 @@ export const NavigationFrame = observer(
               opacity: 1,
               backgroundColor: customTheme.dark,
               padding: "20px",
+              display: "flex",
+              flexDirection: "row",
+              justifyContent: "center",
+              alignItems: "center",
             }}
           >
-            <IconButton>
-              <CosmicWalletIcon size={50} />
-            </IconButton>
-            <Typography
-              variant="h2"
+            <div
               style={{
-                flexGrow: 1,
+                width: extension ? "100%" : "80%",
+                display: "flex",
+                flexDirection: "row",
+                justifyContent: "center",
+                alignItems: "center",
               }}
             >
-              COSMIC WALLET
-            </Typography>
-            <AddressDisplay />
-            <ButtonGroup />
+              <IconButton>
+                <CosmicWalletIcon size={50} />
+              </IconButton>
+              <Typography
+                variant="h2"
+                style={{
+                  flexGrow: 1,
+                }}
+              >
+                COSMIC WALLET
+              </Typography>
+              <AddressDisplay />
+              <ButtonGroup />
+            </div>
           </Toolbar>
         </AppBar>
         <Content>{children}</Content>

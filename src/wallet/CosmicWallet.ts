@@ -586,11 +586,6 @@ export class CosmicWallet {
             `Missing name for derived account: ${keypair.publicKey.toString()}`,
           );
         }
-        console.log(
-          "derived:",
-          name,
-          shortenAddress(keypair.publicKey.toString()),
-        );
         return {
           keypair,
           name,
@@ -625,7 +620,11 @@ export class CosmicWallet {
     const accounts = (derivedAccounts as WalletAccount[]).concat(
       importedAccounts as WalletAccount[],
     );
-    console.log("accounts", accounts.length);
+    console.log(
+      "wallet accounts: ",
+      accounts.length,
+      // accounts.map((a) => `name: ${a.name}, keypair? ${!!a.keypair}`),
+    );
 
     this._walletAccounts = {
       accounts,

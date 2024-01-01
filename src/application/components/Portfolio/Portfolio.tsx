@@ -1,7 +1,7 @@
 import React from "react";
 import { observer } from "mobx-react";
 import { CosmicWallet } from "../../../wallet";
-import { Container, Table, TableBody, Row, Cell } from "./styles";
+import { Container, Table, TableBody, Row, Cell, Divider } from "./styles";
 import {
   customTheme,
   ParsedTokenBalance,
@@ -39,6 +39,9 @@ const BalancesTable = observer(
                 </Typography>
               </Cell>
             </Row>
+            {[...cosmicWallet.tokenBalances.values()].length !== 0 && (
+              <Divider />
+            )}
 
             {cosmicWallet.refreshTokenState === RefreshState.Ready &&
               [...cosmicWallet.tokenBalances.values()].map((value) => (
@@ -63,6 +66,7 @@ const BalancesTable = observer(
                       </Typography>
                     </Cell>
                   </Row>
+                  <Divider />
                 </>
               ))}
           </TableBody>
