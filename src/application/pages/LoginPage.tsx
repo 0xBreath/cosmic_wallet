@@ -52,12 +52,7 @@ export const LoginPage = observer(() => {
   // const extension = useIsExtensionWidth();
 
   return (
-    <Container
-      maxWidth="sm"
-      // style={{
-      //   marginBottom: extension ? "30px" : 0,
-      // }}
-    >
+    <Container maxWidth="sm">
       {restore ? (
         <RestoreWalletForm goBack={() => setRestore(false)} />
       ) : (
@@ -151,15 +146,14 @@ const SeedWordsForm = observer(
       copyToClipboard(mnemonic);
     };
 
+    const extension = useExtension();
+
     return (
       <>
-        <Card>
+        <Card style={{ marginBottom: extension ? "30px" : "0px" }}>
           <CardContent>
             <Typography variant="h5" gutterBottom>
               Create New Wallet
-            </Typography>
-            <Typography paragraph>
-              Create a new wallet to hold Solana and SPL tokens.
             </Typography>
             <Typography>
               Please write down the following twenty four words and keep them in
@@ -187,18 +181,6 @@ const SeedWordsForm = observer(
               By default, Cosmic will use <code>m/44'/501'/0'/0'</code>{" "}
               (Bip44Change) as the derivation path for the main wallet. To use
               an alternative path, try restoring an existing wallet.
-            </Typography>
-            <Typography paragraph>
-              <b>Note:</b> For certain users, Cosmic may <b>NOT</b> be secure.
-              See{" "}
-              <a
-                style={{ color: "inherit" }}
-                href="https://medium.com/metamask/security-notice-extension-disk-encryption-issue-d437d4250863"
-                target="__blank"
-              >
-                this article
-              </a>{" "}
-              to understand if you are at risk.
             </Typography>
             <FormControlLabel
               control={

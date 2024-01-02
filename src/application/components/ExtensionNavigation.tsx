@@ -10,12 +10,9 @@ import {
   ExtensionAccountSelectionMenu,
   ExtensionNetworkSelectionMenu,
   NavigationActionButton,
-  NetworkIcon,
 } from ".";
 
 export const ExtensionNavigation = () => {
-  const [anchorEl, setAnchorEl] = React.useState(null);
-
   return (
     <BottomNavigation
       sx={{

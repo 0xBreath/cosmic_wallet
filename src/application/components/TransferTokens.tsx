@@ -199,6 +199,9 @@ const HeaderRow = styled("div")(({ theme }) => ({
   alignItems: "center",
   justifyContent: "center",
   width: "100%",
+  [theme.breakpoints.down(theme.breakpoints.values.ext)]: {
+    marginTop: "20px",
+  },
 }));
 
 const ExitWrapper = styled("div")(({ theme }) => ({
@@ -206,6 +209,9 @@ const ExitWrapper = styled("div")(({ theme }) => ({
   alignItems: "center",
   justifyContent: "center",
   width: "10%",
+  [theme.breakpoints.down(theme.breakpoints.values.ext)]: {
+    marginRight: "10px",
+  },
 }));
 
 const TitleWrapper = styled("div")(({ theme }) => ({
@@ -213,6 +219,11 @@ const TitleWrapper = styled("div")(({ theme }) => ({
   flexDirection: "row",
   alignItems: "center",
   justifyContent: "center",
-  marginRight: "100px",
+  [theme.breakpoints.up(theme.breakpoints.values.ext)]: {
+    marginRight: "100px",
+  },
+  [theme.breakpoints.down(theme.breakpoints.values.ext)]: {
+    marginRight: "60px",
+  },
   width: "90%",
 }));
