@@ -105,8 +105,7 @@
   "scripts": {
     "wipe": "yarn && rm -rf dist && rm -rf .parcel-cache",
     "build": "yarn wipe && parcel build manifest.json src/index.html",
-    "start": "PORT=3001 parcel src/index.html",
-    "start:prod": "parcel src/index.html"
+    "start": "PORT=3001 parcel src/index.html"
   },
   "keywords": [],
   "author": "",
