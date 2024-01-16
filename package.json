@@ -4,6 +4,7 @@
   "private": true,
   "description": "",
   "type": "module",
+  "source": "src/index.html",
   "browserslist": "> 0.5%, last 2 versions, not dead",
   "dependencies": {
     "@emotion/react": "^11.11.1",
