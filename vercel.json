@@ -6,8 +6,8 @@
     }
   ],
   "installCommand": "yarn install",
-  "buildCommand": "parcel build manifest.json src/index.html --public-url ./",
-  "devCommand": "parcel build manifest.json src/index.html --public-url ./",
+  "buildCommand": "parcel build manifest.json src/index.html",
+  "devCommand": "parcel src/index.html",
   "framework": "parcel",
   "outputDirectory": "dist",
   "public": true
