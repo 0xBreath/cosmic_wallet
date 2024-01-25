@@ -5,7 +5,7 @@
       "destination": "src/index.html"
     }
   ],
-  "installCommand": "npm install",
+  "installCommand": "yarn install",
   "buildCommand": "parcel build manifest.json src/index.html --public-url ./",
   "devCommand": "parcel build manifest.json src/index.html --public-url ./",
   "framework": "parcel",
