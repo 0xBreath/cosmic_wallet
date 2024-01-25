@@ -2,7 +2,13 @@
   "rewrites": [
     {
       "source": "/(.*)",
-      "destination": "/"
+      "destination": "src/index.html"
     }
-  ]
+  ],
+  "installCommand": "npm install",
+  "buildCommand": "parcel build manifest.json src/index.html --public-url ./",
+  "devCommand": "parcel build manifest.json src/index.html --public-url ./",
+  "framework": "parcel",
+  "outputDirectory": "dist",
+  "public": true
 }
